@@ -160,5 +160,7 @@ int main(int argc, char* argv[]) {
 
 	const char* decoded_data = argv[1];
 
-	return decodeMain(filename, decoded_data);
+	decodeMain(filename, decoded_data);
+
+	return 0;
 }

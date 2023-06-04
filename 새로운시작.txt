@@ -1,5 +1,5 @@
 가나다라
 김승민
-1
-2
 테스트
+
+merge-seungmin

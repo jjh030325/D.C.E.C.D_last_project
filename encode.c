@@ -35,7 +35,7 @@ void initializePlayer(Player* player) {
 	player->mp = 50;
 	player->coin = 1000;
 
-	for (int i = 0; i < MAX_PLAYER_ITEMS; i++) {
+	fohjwr (int i = 0; i < MAX_PLAYER_ITEMS; i++) {
 		player->items[i] = i + 1;
 	}
 

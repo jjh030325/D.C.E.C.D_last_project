@@ -83,27 +83,27 @@ void encodeData(const char* inputFile, const char* outputFile)
 								if (strncmp(line, "BOMB:", 5) == 0)
                 {
 										removeSubstring(line, "BOMB:");
-										
+										fwrite("A", sizeof(char), 1, output);										
                 }else if(strncmp(line, "POTION:", 7) == 0)
 								{
 										removeSubstring(line, "POTION:");
-
+										fwrite("P", sizeof(char), 1, output);
 								}else if(strncmp(line, "CURE:", 5) == 0)
 								{
 										removeSubstring(line, "CURE:");
-
+										fwrite("C", sizeof(char), 1, output);
 								}else if(strncmp(line, "BOOK:", 5) == 0)
 								{
 										removeSubstring(line, "BOOK:");
-
+										fwrite("B", sizeof(char), 1, output);
 								}else if(strncmp(line, "SHIELD:", 7) == 0)
 								{
 										removeSubstring(line, "SHIELD:");
-
+										fwrite("S", sizeof(char), 1, output);
 								}else if(strncmp(line, "CANNON:", 7) == 0)
 								{
 										removeSubstring(line, "CANNON:");
-
+										fwrite("I", sizeof(char), 1, output);
 								}
                 fwrite(line, sizeof(char), strlen(line), output);
                 break;

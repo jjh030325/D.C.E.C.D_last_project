@@ -1,7 +1,48 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+void encodeASC(const char* outputFile){
+		FILE* output = fopen(outputFile, "rb");
+		if (output == NULL)
+		{
+				printf("Failed to open output file.\n");
+				return;
+		}
+		int size = 0;
+		int **asc;
+		char ch;
+		while(fread(&ch, 1, 1, output) == 1) size++; // 파일 전체 사이즈
+		int height = size / 100;
 
+		asc = (int**)malloc(sizeof(int) * height * 2);
+		for(int i = 0; i < 11; i++)
+			asc[i] = (int*)malloc(sizeof(int) * 11);
+		size -= height * 100;
+		printf("size : %d height : %d\n", size, height);
+		fclose(output);
+		output = NULL;
+
+
+		if (output == NULL)
+		{
+				printf("Failed to open output file.\n");
+				return;
+		}
+		printf("size : %d height : %d\n", size, height);
+		for(int i = 0; i < height*2; i++){
+				for(int j = 0; j < 11; j++){
+						
+						asc[i][j] = ch;
+						if(j == 10)
+				}
+		}
+
+
+		for(int i = 0; i < hegiht*2; i++)
+			free(asc[i]);
+		free(asc)
+		fclose(output);
+}
 void removeSubstring(char* s, const char* toRemove)
 {
     char* match = strstr(s, toRemove);
@@ -83,27 +124,27 @@ void encodeData(const char* inputFile, const char* outputFile)
 								if (strncmp(line, "BOMB:", 5) == 0)
                 {
 										removeSubstring(line, "BOMB:");
-										
+										fwrite("A", sizeof(char), 1, output);										
                 }else if(strncmp(line, "POTION:", 7) == 0)
 								{
 										removeSubstring(line, "POTION:");
-
+										fwrite("P", sizeof(char), 1, output);
 								}else if(strncmp(line, "CURE:", 5) == 0)
 								{
 										removeSubstring(line, "CURE:");
-
+										fwrite("C", sizeof(char), 1, output);
 								}else if(strncmp(line, "BOOK:", 5) == 0)
 								{
 										removeSubstring(line, "BOOK:");
-
+										fwrite("B", sizeof(char), 1, output);
 								}else if(strncmp(line, "SHIELD:", 7) == 0)
 								{
 										removeSubstring(line, "SHIELD:");
-
+										fwrite("S", sizeof(char), 1, output);
 								}else if(strncmp(line, "CANNON:", 7) == 0)
 								{
 										removeSubstring(line, "CANNON:");
-
+										fwrite("I", sizeof(char), 1, output);
 								}
                 fwrite(line, sizeof(char), strlen(line), output);
                 break;
@@ -151,7 +192,8 @@ int main(int argc, char* argv[])
 
     encodeData(inputFile, outputFile);
     printf("Encoded data saved to '%s'.\n", outputFile);
-
+		encodeASC(outputFile);
+		printf("Encoded ASC saved to '%s',\n", outputFile);
     return 0;
 }
 

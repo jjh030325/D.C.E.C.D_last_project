@@ -87,6 +87,7 @@ void encodeData(const char* inputFile, const char* outputFile)
             {
                 if (strncmp(line, "FRIEND", 6) == 0)
                 {
+										removeSubstring(line, "FRIEND");
                     char* position = strchr(line, ' ');
                     if (position != NULL)
                     {

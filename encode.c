@@ -80,6 +80,31 @@ void encodeData(const char* inputFile, const char* outputFile)
             }
             case 1:  // Items
             {
+								if (strncmp(line, "BOMB:", 5) == 0)
+                {
+										removeSubstring(line, "BOMB:");
+										
+                }else if(strncmp(line, "POTION:", 7) == 0)
+								{
+										removeSubstring(line, "POTION:");
+
+								}else if(strncmp(line, "CURE:", 5) == 0)
+								{
+										removeSubstring(line, "CURE:");
+
+								}else if(strncmp(line, "BOOK:", 5) == 0)
+								{
+										removeSubstring(line, "BOOK:");
+
+								}else if(strncmp(line, "SHIELD:", 7) == 0)
+								{
+										removeSubstring(line, "SHIELD:");
+
+								}else if(strncmp(line, "CANNON:", 7) == 0)
+								{
+										removeSubstring(line, "CANNON:");
+
+								}
                 fwrite(line, sizeof(char), strlen(line), output);
                 break;
             }

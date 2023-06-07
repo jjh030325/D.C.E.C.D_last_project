@@ -1,0 +1,84 @@
+#define _CRT_SECURE_NO_WARNINGS
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+int main() {
+	int a[10][10][10];
+	int n = 1;
+	int i, j, k;
+	//초기화
+	for (i = 0; i < 10; i++) {
+		for (j = 0; j < 10; j++) {
+			for (k = 0; k < 10; k++) {
+				a[i][j][k] = n;
+				n++;
+			}
+		}
+	}
+
+	//출력
+	for (i = 0; i < 10; i++) {
+		printf("a[%d][x][x] 출력\n", i);
+		for (j = 0; j < 10; j++) {
+			for (k = 0; k < 10; k++) {
+				printf("%5d", a[i][j][k]);
+			}
+			puts("");
+		}
+		puts("");
+	}
+	
+	//가로세로깊이
+	int aaa[10][10] = { 0, };
+	for (i = 0; i < 10; i++) {
+		for (j = 0; j < 10; j++) {
+			for (k = 0; k < 10; k++) {
+				aaa[j][i] += a[i][j][k];
+			}
+		}
+	}
+	for (i = 0; i < 10; i++) {
+		printf("%d층:\t", i);
+		for (j = 0; j < 10; j++) {
+			printf("%d\t", aaa[j][i]);
+		}
+		printf("\n");
+	}
+
+	printf("\n");
+
+	int bbb[10][10] = { 0, };
+	for (i = 0; i < 10; i++) {
+		for (j = 0; j < 10; j++) {
+			for (k = 0; k < 10; k++) {
+				bbb[j][i] += a[i][k][j];
+			}
+		}
+	}
+	for (i = 0; i < 10; i++) {
+		printf("%d층:\t", i);
+		for (j = 0; j < 10; j++) {
+			printf("%d\t", bbb[j][i]);
+		}
+		printf("\n");
+	}
+
+	printf("\n");
+
+	int ccc[10][10] = { 0, };
+	for (i = 0; i < 10; i++) {
+		for (j = 0; j < 10; j++) {
+			for (k = 0; k < 10; k++) {
+				ccc[j][k] += a[i][j][k];
+			}
+		}
+	}
+	for (i = 0; i < 10; i++) {
+		printf("%d층:\t", i);
+		for (j = 0; j < 10; j++) {
+			printf("%d\t", ccc[i][j]);
+		}
+		printf("\n");
+	}
+	return 0;
+}

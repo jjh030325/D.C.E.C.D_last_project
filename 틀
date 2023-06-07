@@ -1,0 +1,16 @@
+
+    FILE* file = fopen("code.txt", "r");  // 읽기 모드로 파일 열기
+    if (file == NULL) {
+        printf("파일을 열 수 없습니다.");
+        return 1;
+    }
+
+    int ch, n = 0;
+    while ((ch = fgetc(file)) != EOF) {
+        printf("%c", ch);  // 문자 출력
+        n++;
+    }
+
+    fclose(file);  // 파일 닫기
+    printf("\n바이트 : %d", n);
+    return 0;

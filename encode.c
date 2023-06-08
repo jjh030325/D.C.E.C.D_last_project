@@ -16,12 +16,12 @@ void encodeASC(const* char inputFile, const char* outputFile){
 		int ASC_row[height + 1][11];
 		int ASC_height[11][11];
 
-		for(int k = 0; k < height; k++){
-				for(int i = 0; i < 10; i++){
-						for(int j = 0; j < 10; j++){
-								fread(&ch, 1, 1, output);
-								ASC_column[k][j] += ch;
-								ASC_row[k][i] += ch;
+		for(int k = 0; k < height; k++){ // 최대 높이 만큼 반복
+				for(int i = 0; i < 10; i++){ // 세로
+						for(int j = 0; j < 10; j++){ // 가로
+								fread(&ch, 1, 1, output); // 한바이트씩 읽어온다
+								ASC_column[k][j] += ch; // 높이는 고정, 가로 j가 증가하면서
+								ASC_row[k][i] += ch; // 높이 고정, 세로 i가 증가하면서 
 								ASC_height[i][j] += ch;
 						}
 				}

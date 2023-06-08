@@ -32,9 +32,33 @@ void restore(const char* inputFile, const char* outputFile){
 		return;
 	}
 
+	int newlineCount = 0; // 연속된 '\n' 개수를 저장하기 위한 변수
+
+	fprintf(textFile, "*USER STATUS*\n");
+
 	// 바이너리 파일에서 데이터 읽어와 텍스트 파일에 쓰기
 	int ch;
 	while ((ch = fgetc(binaryFile)) != EOF) {
+		// '\n' 문자일 경우
+		if (ch == '\n') {
+			newlineCount++;
+
+			// 첫 번째 연속 '\n'일 경우 *ITEMS* 입력
+			if (newlineCount == 1) {
+				fprintf(textFile, "*ITEMS*\n");
+				continue;
+			}
+
+			// 두 번째 연속 '\n'일 경우 *FRIENDS LIST* 입력
+			if (newlineCount == 2) {
+				fprintf(textFile, "*FRIENDS LIST*\n");
+				continue;
+			}
+		}
+
+		// 개행 문자가 아닐 경우 newlineCount 초기화
+		newlineCount = 0;
+
 		fprintf(textFile, "%c", ch);
 	}
 
@@ -52,7 +76,8 @@ int main(int argc, char* argv[]){
 
 	const char * inputFile = argv[1];
 	const char * outputFile = argv[2];
-  restore(inputFile, outputFile);
+	restore(inputFile, outputFile);
 
-  return 0;
+	return 0;
 }
+

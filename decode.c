@@ -34,8 +34,9 @@ void restore(const char* inputFile, const char* outputFile){
 
 	int newlineCount = 0; // 연속된 '\n' 개수를 저장하기 위한 변수
 	int isFirstItem = 1; // 첫 번째 *ITEMS* 입력 여부를 확인하기 위한 변수
+	int userStatusCount = 0; // *USER STATUS* 섹션 내의 데이터 개수를 저장하기 위한 변수
 
-	fprintf(textFile, "*USER STATUS*\n");
+	fprintf(textFile, "*USER STATUS*\nID: ");
 
 	// 바이너리 파일에서 데이터 읽어와 텍스트 파일에 쓰기
 	int ch;
@@ -43,6 +44,33 @@ void restore(const char* inputFile, const char* outputFile){
     // '\n' 문자일 경우
     if (ch == '\n') {
         newlineCount++;
+				if (newlineCount == 1 && userStatusCount <= 6) {
+        // *USER STATUS* 섹션 내의 데이터를 출력
+						switch (userStatusCount) {
+								case 0:
+										fprintf(textFile, "\nNAME: ");
+										break;
+								case 1:
+										fprintf(textFile, "\nGENDER: ");
+										break;
+								case 2:
+										fprintf(textFile, "\nAGE: ");
+										break;
+								case 3:
+										fprintf(textFile, "\nHP: ");
+										break;
+								case 4:
+										fprintf(textFile, "\nMP: ");
+										break;
+								case 5:
+										fprintf(textFile, "\nCOIN: ");
+										break;
+								default:
+										break;
+						}
+						userStatusCount++;
+				}
+
         if (newlineCount == 2) {
 						if(isFirstItem == 1)
 						{
@@ -60,7 +88,12 @@ void restore(const char* inputFile, const char* outputFile){
         // 개행 문자가 아닐 경우 newlineCount 초기화
         newlineCount = 0;
     }
-		fprintf(textFile, "%c", ch);
+		if(newlineCount==0)
+				fprintf(textFile, "%c", ch);
+		else if(userStatusCount >= 7)
+				fprintf(textFile, "%c", ch);
+		if(userStatusCount == 7)
+				userStatusCount++;
 	}
 
 	// 파일 닫기

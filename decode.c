@@ -3,17 +3,26 @@
 #include <string.h>
 
 void getFile(){
+	// 파일을 받아오는 함수, 문자열과 아스키 데이터를 추출하는 함수
 }
 
 void setTable(){
+	// 파일에서 압축 문자열을 테이블로 세팅 하는 함수
 }
 
 void getTable(){
+	// 변조 부분을 찾기 위한 아스키 테이터를 추출 하는 함수
 }
 
 void checkData(){
+	// 변조 체크를 하는 함수
 }
 
+void dataRestore(){
+	// 바이너리 파일 복원 함수
+}
+
+//파일 복원 함수
 void restore(const char* inputFile, const char* outputFile){
 	FILE* binaryFile;     
 	FILE* textFile;

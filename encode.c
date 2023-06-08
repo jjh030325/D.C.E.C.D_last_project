@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-void encodeASC(const char* outputFile){
+void encodeASC(const* char inputFile, const char* outputFile){
 		FILE* output = fopen(outputFile, "rb");
 		if (output == NULL)
 		{
@@ -9,40 +9,39 @@ void encodeASC(const char* outputFile){
 				return;
 		}
 		int size = 0;
-		int **asc;
 		char ch;
 		while(fread(&ch, 1, 1, output) == 1) size++; // 파일 전체 사이즈
 		int height = size / 100;
+		int ASC_column[height + 1][11];
+		int ASC_row[height + 1][11];
+		int ASC_height[11][11];
 
-		asc = (int**)malloc(sizeof(int) * height * 2);
-		for(int i = 0; i < 11; i++)
-			asc[i] = (int*)malloc(sizeof(int) * 11);
-		size -= height * 100;
-		printf("size : %d height : %d\n", size, height);
-		fclose(output);
-		output = NULL;
-
-
-		if (output == NULL)
-		{
-				printf("Failed to open output file.\n");
-				return;
+		for(int k = 0; k < height; k++){
+				for(int i = 0; i < 10; i++){
+						for(int j = 0; j < 10; j++){
+								fread(&ch, 1, 1, output);
+								ASC_column[k][j] += ch;
+								ASC_row[k][i] += ch;
+								ASC_height[i][j] += ch;
+						}
+				}
+				FILE* input = fopen(outputFile, "ab");
+				fwrite(ASC_column, sizeof(ASC_column), 1, input);
+				fwrite(ASC_row, sizeof(ASC_row), 1, input);
+				ASC_column = 0;
+				ASC_row = 0;
+				fclose(input);
 		}
-		printf("size : %d height : %d\n", size, height);
-		for(int i = 0; i < height*2; i++){
-				for(int j = 0; j < 11; j++){
+
+		size -= 100*height;
+		for(int i = 0; i < size/10; i++){
+				for(int j = 0; j < 10; j++){
 						
-						asc[i][j] = ch;
-						if(j == 10)
 				}
 		}
-
-
-		for(int i = 0; i < hegiht*2; i++)
-			free(asc[i]);
-		free(asc)
 		fclose(output);
 }
+
 void removeSubstring(char* s, const char* toRemove)
 {
     char* match = strstr(s, toRemove);
@@ -192,7 +191,7 @@ int main(int argc, char* argv[])
 
     encodeData(inputFile, outputFile);
     printf("Encoded data saved to '%s'.\n", outputFile);
-		encodeASC(outputFile);
+		encodeASC(inputFile, outputFile);
 		printf("Encoded ASC saved to '%s',\n", outputFile);
     return 0;
 }

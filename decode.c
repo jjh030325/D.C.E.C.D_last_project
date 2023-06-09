@@ -97,6 +97,29 @@ void restore(const char* inputFile, const char* outputFile){
         // 개행 문자가 아닐 경우 newlineCount 초기화
         newlineCount = 0;
     }
+		// *ITEMS* 섹션 이후부터 *FRIENDS LIST* 이전까지만 첫 글자를 보고 텍스트를 추가
+    if (isFirstItem == 2) {
+        if (newlineCount == 0) {
+            if (ch=='A') {
+                fprintf(textFile, "BOMB:");
+            }
+            else if(ch=='P'){
+                fprintf(textFile, "POTION:");
+            }
+						else if(ch=='C') {
+								fprintf(textFile, "CURE:");
+						}
+						else if(ch=='B') {
+								fprintf(textFile, "BOOK:");
+						}
+						else if(ch=='S') {
+								fprintf(textFile, "SHIELD:");
+						}
+						else if(ch=='I') {
+								fprintf(textFile, "CANNON:");
+						}
+        }
+    }
 		if(newlineCount==0)
 				fprintf(textFile, "%c", ch);
 		else if(userStatusCount >= 7)

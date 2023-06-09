@@ -51,6 +51,7 @@ void encodeData(const char* inputFile, const char* outputFile)
             else if (strcmp(line, "*DESCRIPTION*\n") == 0)
 						{
                 section = 3;
+								fwrite("/", sizeof(char), 1, output);
 						}
 
             continue;
@@ -80,6 +81,31 @@ void encodeData(const char* inputFile, const char* outputFile)
             }
             case 1:  // Items
             {
+								if (strncmp(line, "BOMB:", 5) == 0)
+                {
+										removeSubstring(line, "BOMB:");
+										fwrite("A", sizeof(char), 1, output);										
+                }else if(strncmp(line, "POTION:", 7) == 0)
+								{
+										removeSubstring(line, "POTION:");
+										fwrite("P", sizeof(char), 1, output);
+								}else if(strncmp(line, "CURE:", 5) == 0)
+								{
+										removeSubstring(line, "CURE:");
+										fwrite("C", sizeof(char), 1, output);
+								}else if(strncmp(line, "BOOK:", 5) == 0)
+								{
+										removeSubstring(line, "BOOK:");
+										fwrite("B", sizeof(char), 1, output);
+								}else if(strncmp(line, "SHIELD:", 7) == 0)
+								{
+										removeSubstring(line, "SHIELD:");
+										fwrite("S", sizeof(char), 1, output);
+								}else if(strncmp(line, "CANNON:", 7) == 0)
+								{
+										removeSubstring(line, "CANNON:");
+										fwrite("I", sizeof(char), 1, output);
+								}
                 fwrite(line, sizeof(char), strlen(line), output);
                 break;
             }
@@ -87,6 +113,7 @@ void encodeData(const char* inputFile, const char* outputFile)
             {
                 if (strncmp(line, "FRIEND", 6) == 0)
                 {
+										removeSubstring(line, "FRIEND");
                     char* position = strchr(line, ' ');
                     if (position != NULL)
                     {
@@ -94,10 +121,12 @@ void encodeData(const char* inputFile, const char* outputFile)
                         removeSubstring(position, "NAME: ");
                         removeSubstring(position, "GENDER: ");
                         removeSubstring(position, "AGE: ");
+
+												// Replace the first space with "&"
+                    		*position = '&';
                     }
                 }
-
-                fwrite(line, sizeof(char), strlen(line), output);
+								fwrite(line, sizeof(char), strlen(line), output);
                 break;
             }
             case 3:  // Description

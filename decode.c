@@ -2,131 +2,202 @@
 #include <stdlib.h>
 #include <string.h>
 
-void decodeData(const char* inputFile, const char* outputFile)
-{
-    FILE* input = fopen(inputFile, "rb");
-    if (input == NULL)
-    {
-        printf("Failed to open the input file.\n");
-        return;
-    }
+void getFile(){
+	// 파일을 받아오는 함수, 문자열과 아스키 데이터를 추출하는 함수
+}
 
-    FILE* output = fopen(outputFile, "w");
-    if (output == NULL)
-    {
-        printf("Failed to open the output file.\n");
-        fclose(input);
-        return;
-    }
+void setTable(){
+	// 파일에서 압축 문자열을 테이블로 세팅 하는 함수
+}
 
-    size_t dataSize;
-    while (fread(&dataSize, sizeof(size_t), 1, input) == 1)
-    {
-        char* line = (char*)malloc(dataSize);
-        if (line == NULL)
-        {
-            printf("Failed to allocate memory.\n");
-            fclose(input);
-            fclose(output);
-            return;
+void getTable(){
+	// 변조 부분을 찾기 위한 아스키 테이터를 추출 하는 함수
+}
+
+void checkData(){
+	// 변조 체크를 하는 함수
+}
+
+void dataRestore(){
+	// 바이너리 파일 복원 함수
+}
+
+//파일 복원 함수
+void restore(const char* inputFile, const char* outputFile){
+	FILE* binaryFile;     
+	FILE* textFile;
+	// 바이너리 파일 열기
+	binaryFile = fopen(inputFile, "rb");
+	if (binaryFile == NULL) {
+		printf("바이너리 파일을 열 수 없습니다.");
+		return;
+	}
+
+	// 텍스트 파일 열기
+	textFile = fopen(outputFile, "w");
+	if (textFile == NULL) {
+		printf("텍스트 파일을 생성할 수 없습니다.");
+		fclose(binaryFile);
+		return;
+	}
+
+	int newlineCount = 0; // 연속된 '\n' 개수를 저장하기 위한 변수
+	int isFirstItem = 1; // 첫 번째 *ITEMS* 입력 여부를 확인하기 위한 변수
+	int userStatusCount = 0; // *USER STATUS* 섹션 내의 데이터 개수를 저장하기 위한 변수
+	int firstspace_check = 0; //FRIEND LIST 섹션 공백 개수 저장 변수
+	int friend_check = 0; //FRIEND LIST 항목 체크용 변수 0 = ID, 1 = NAME...etc
+
+	fprintf(textFile, "*USER STATUS*\nID: ");
+
+	// 바이너리 파일에서 데이터 읽어와 텍스트 파일에 쓰기
+	int ch;
+	while ((ch = fgetc(binaryFile)) != EOF) {
+    // '\n' 문자일 경우
+    if (ch == '\n') {
+        newlineCount++;
+				firstspace_check = 0;
+				if (newlineCount == 1 && userStatusCount <= 6) {
+        // *USER STATUS* 섹션 내의 데이터를 출력
+						switch (userStatusCount) {
+								case 0:
+										fprintf(textFile, "\nNAME: ");
+										break;
+								case 1:
+										fprintf(textFile, "\nGENDER: ");
+										break;
+								case 2:
+										fprintf(textFile, "\nAGE: ");
+										break;
+								case 3:
+										fprintf(textFile, "\nHP: ");
+										break;
+								case 4:
+										fprintf(textFile, "\nMP: ");
+										break;
+								case 5:
+										fprintf(textFile, "\nCOIN: ");
+										break;
+								default:
+										break;
+						}
+						userStatusCount++;
+				}
+
+        if (newlineCount == 2) {
+						if(isFirstItem == 1)
+						{
+           			// 첫 번째 '\n\n'일 경우 *ITEMS* 출력
+            		fprintf(textFile, "\n*ITEMS*");
+								isFirstItem++;
+						}else if(isFirstItem == 2)
+						{
+								// 두 번째 '\n\n'일 경우 *FRIENDS LIST* 출력
+								fprintf(textFile, "\n*FRIENDS LIST*");
+								isFirstItem++;				
+						}
         }
-
-        fread(line, sizeof(char), dataSize, input);
-
-        fwrite(line, sizeof(char), dataSize, output);
-
-        free(line);
+    } else {
+        // 개행 문자가 아닐 경우 newlineCount 초기화
+        newlineCount = 0;
     }
 
-    fclose(input);
-    fclose(output);
-}
-
-int main(int argc, char* argv[])
-{
-    if (argc != 3)
-    {
-        printf("Usage: ./decoder.out <input_file> <output_file>\n");
-        return 1;
+    if (isFirstItem == 3) {
+        if (newlineCount == 0) {
+            if (ch >= '1' && ch <= '9' && firstspace_check == 0)
+            {
+                fprintf(textFile, "FRIEND");
+								firstspace_check++;
+            }
+        }
     }
 
-    const char* inputFile = argv[1];
-    const char* outputFile = argv[2];
 
-    decodeData(inputFile, outputFile);
+		if(newlineCount==0)
+				fprintf(textFile, "%c", ch);
+    else if(userStatusCount >= 7)
+        fprintf(textFile, "%c", ch);
+    if(userStatusCount == 7)
+				userStatusCount++;
+		// *ITEMS* 섹션 이후부터 *FRIENDS LIST* 이전까지만 첫 글자를 보고 텍스트를 추가
+    if (isFirstItem == 2) {
+        if (newlineCount == 0) {
+            if (ch=='A') {
+								fseek(textFile, -1, SEEK_CUR);
+                fprintf(textFile, "BOMB:");
+            }
+            else if(ch=='P'){
+								fseek(textFile, -1, SEEK_CUR);
+                fprintf(textFile, "POTION:");
+            }
+						else if(ch=='C') {
+								fseek(textFile, -1, SEEK_CUR);
+								fprintf(textFile, "CURE:");
+						}
+						else if(ch=='B') {
+								fseek(textFile, -1, SEEK_CUR);
+								fprintf(textFile, "BOOK:");
+						}
+						else if(ch=='S') {
+								fseek(textFile, -1, SEEK_CUR);
+								fprintf(textFile, "SHIELD:");
+						}
+						else if(ch=='I') {
+								fseek(textFile, -1, SEEK_CUR);
+								fprintf(textFile, "CANNON:");
+						}
+        }
+    }
 
-    printf("Decoded data saved to '%s'.\n", outputFile);
+		if (isFirstItem == 3) {
+        if (newlineCount == 0) {
+            if (ch == '/') {
+                fseek(textFile, -1, SEEK_CUR);
+                fprintf(textFile, "*DESCRIPTION*\n");
+                isFirstItem++;
+            }else if(ch == '&') {
+								fseek(textFile, -1, SEEK_CUR);
+								fprintf(textFile, " ");
+								switch(friend_check)
+								{
+										case 0:
+												fprintf(textFile, "ID: ");
+												friend_check++;
+												break;
+										case 1:
+												fprintf(textFile, "NAME: ");
+												friend_check++;
+												break;
+										case 2:
+												fprintf(textFile, "GENDER: ");
+												friend_check++;
+												break;
+										case 3:
+												fprintf(textFile, "AGE: ");
+												friend_check = 0;
+												break;
+								}
+						}
+        }
+    }
 
-    return 0;
+	}
+
+	// 파일 닫기
+	fclose(binaryFile);
+	fclose(textFile);
+	printf("텍스트 파일로 변환되었습니다.\n");
 }
 
-<<<<<<< HEAD
-// 디코딩 메인 함수
-int decodeMain(const char* filename, const char* outputFilename) {
-	FILE* file = fopen(filename, "rb");
-	if (!file) {
-		printf("Failed to open file: %s\n", filename);
+int main(int argc, char* argv[]){
+	if (argc != 3){
+		printf("User: ./decoder.out <input_file> <output_file>\n");
 		return 1;
 	}
 
-	// 플레이어 정보 디코딩
-	Player decodedPlayer;
-	decodePlayerInfo(file, &decodedPlayer);
-
-	// 디코딩된 플레이어 정보 출력
-	FILE* outputFile = fopen(outputFilename, "w");
-	if (!outputFile) {
-		printf("Failed to create output file: %s\n", outputFilename);
-		return 1;
-	}
-
-	fprintf(outputFile, "ID: %d\n", decodedPlayer.id);
-	fprintf(outputFile, "Name: %s\n", decodedPlayer.name);
-	fprintf(outputFile, "Gender: %c\n", decodedPlayer.gender);
-	fprintf(outputFile, "Age: %d\n", decodedPlayer.age);
-	fprintf(outputFile, "HP: %d\n", decodedPlayer.hp);
-	fprintf(outputFile, "MP: %d\n", decodedPlayer.mp);
-	fprintf(outputFile, "Coin: %d\n", decodedPlayer.coin);
-	fprintf(outputFile, "Items: ");
-	for (int i = 0; i < MAX_PLAYER_ITEMS; i++) {
-		fprintf(outputFile, "%d ", decodedPlayer.items[i]);
-	}
-	fprintf(outputFile, "\n");
-	fprintf(outputFile, "Friends: \n");
-	for (int i = 0; i < MAX_FRIENDS; i++) {
-		fprintf(outputFile, "Friend %d:\n", i + 1);
-		fprintf(outputFile, "  ID: %d\n", decodedPlayer.friends[i].id);
-		fprintf(outputFile, "  Name: %s\n", decodedPlayer.friends[i].name);
-		fprintf(outputFile, "  Gender: %c\n", decodedPlayer.friends[i].gender);
-		fprintf(outputFile, "  Age: %d\n", decodedPlayer.friends[i].age);
-	}
-	fprintf(outputFile, "Description: %s\n", decodedPlayer.description);
-
-	fclose(file);
-	fclose(outputFile);
-	printf("Decoding completed. Decoded data is written to %s\n", outputFilename);
-	return 0;
-}
-
-int check_params(int argc, char* argv[]) {
-	if (argc == 2) return 1;
-	return 0;
-}
-
-int main(int argc, char* argv[]) {
-
-	const char* filename = argv[0];
-
-	if (check_params(argc, argv) == 0) {
-		printf("Usage: %s param1\n", filename);
-		exit(1);
-	}
-
-	const char* decoded_data = argv[1];
-
-	decodeMain(filename, decoded_data);
+	const char * inputFile = argv[1];
+	const char * outputFile = argv[2];
+	restore(inputFile, outputFile);
 
 	return 0;
 }
-=======
->>>>>>> 575e448baf14ad2773c62f42ed072a131d0774fe
+

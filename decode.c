@@ -44,6 +44,8 @@ void restore(const char* inputFile, const char* outputFile){
 	int newlineCount = 0; // 연속된 '\n' 개수를 저장하기 위한 변수
 	int isFirstItem = 1; // 첫 번째 *ITEMS* 입력 여부를 확인하기 위한 변수
 	int userStatusCount = 0; // *USER STATUS* 섹션 내의 데이터 개수를 저장하기 위한 변수
+	int firstspace_check = 0; //FRIEND LIST 섹션 공백 개수 저장 변수
+	int friend_check = 0; //FRIEND LIST 항목 체크용 변수 0 = ID, 1 = NAME...etc
 
 	fprintf(textFile, "*USER STATUS*\nID: ");
 
@@ -53,6 +55,7 @@ void restore(const char* inputFile, const char* outputFile){
     // '\n' 문자일 경우
     if (ch == '\n') {
         newlineCount++;
+				firstspace_check = 0;
 				if (newlineCount == 1 && userStatusCount <= 6) {
         // *USER STATUS* 섹션 내의 데이터를 출력
 						switch (userStatusCount) {
@@ -97,6 +100,18 @@ void restore(const char* inputFile, const char* outputFile){
         // 개행 문자가 아닐 경우 newlineCount 초기화
         newlineCount = 0;
     }
+
+    if (isFirstItem == 3) {
+        if (newlineCount == 0) {
+            if (ch >= '1' && ch <= '9' && firstspace_check == 0)
+            {
+                fprintf(textFile, "FRIEND");
+								firstspace_check++;
+            }
+        }
+    }
+
+
 		if(newlineCount==0)
 				fprintf(textFile, "%c", ch);
     else if(userStatusCount >= 7)
@@ -132,14 +147,37 @@ void restore(const char* inputFile, const char* outputFile){
 						}
         }
     }
+
 		if (isFirstItem == 3) {
-				if (newlineCount == 0) {
-						if (ch == '/') {
-								fseek(textFile, -1, SEEK_CUR);
-								fprintf(textFile, "*DESCRIPTION*\n");
-                }
-				}
-		}
+        if (newlineCount == 0) {
+            if (ch == '/') {
+                fseek(textFile, -1, SEEK_CUR);
+                fprintf(textFile, "*DESCRIPTION*\n");
+                isFirstItem++;
+            }else if(ch == ' ') {
+								switch(friend_check)
+								{
+										case 0:
+												fprintf(textFile, "ID: ");
+												friend_check++;
+												break;
+										case 1:
+												fprintf(textFile, "NAME: ");
+												friend_check++;
+												break;
+										case 2:
+												fprintf(textFile, "GENDER: ");
+												friend_check++;
+												break;
+										case 3:
+												fprintf(textFile, "AGE: ");
+												friend_check = 0;
+												break;
+								}
+						}
+        }
+    }
+
 	}
 
 	// 파일 닫기

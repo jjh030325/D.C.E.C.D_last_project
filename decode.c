@@ -97,41 +97,47 @@ void restore(const char* inputFile, const char* outputFile){
         // 개행 문자가 아닐 경우 newlineCount 초기화
         newlineCount = 0;
     }
+		if(newlineCount==0)
+				fprintf(textFile, "%c", ch);
+    else if(userStatusCount >= 7)
+        fprintf(textFile, "%c", ch);
+    if(userStatusCount == 7)
+				userStatusCount++;
 		// *ITEMS* 섹션 이후부터 *FRIENDS LIST* 이전까지만 첫 글자를 보고 텍스트를 추가
     if (isFirstItem == 2) {
         if (newlineCount == 0) {
             if (ch=='A') {
+								fseek(textFile, -1, SEEK_CUR);
                 fprintf(textFile, "BOMB:");
             }
             else if(ch=='P'){
+								fseek(textFile, -1, SEEK_CUR);
                 fprintf(textFile, "POTION:");
             }
 						else if(ch=='C') {
+								fseek(textFile, -1, SEEK_CUR);
 								fprintf(textFile, "CURE:");
 						}
 						else if(ch=='B') {
+								fseek(textFile, -1, SEEK_CUR);
 								fprintf(textFile, "BOOK:");
 						}
 						else if(ch=='S') {
+								fseek(textFile, -1, SEEK_CUR);
 								fprintf(textFile, "SHIELD:");
 						}
 						else if(ch=='I') {
+								fseek(textFile, -1, SEEK_CUR);
 								fprintf(textFile, "CANNON:");
 						}
         }
     }
-		if(newlineCount==0)
-				fprintf(textFile, "%c", ch);
-		else if(userStatusCount >= 7)
-				fprintf(textFile, "%c", ch);
-		if(userStatusCount == 7)
-				userStatusCount++;
 	}
 
 	// 파일 닫기
 	fclose(binaryFile);
 	fclose(textFile);
-	printf("텍스트 파일로 변환되었습니다.");
+	printf("텍스트 파일로 변환되었습니다.\n");
 }
 
 int main(int argc, char* argv[]){

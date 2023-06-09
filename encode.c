@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-void encodeASC(const char* outputFile) 
+void encodeASC(const char* outputFile)
 {
     FILE* output = fopen(outputFile, "rb");
     if (output == NULL)
@@ -18,13 +18,12 @@ void encodeASC(const char* outputFile)
     size -= 100 * height; // 백자리 제외
     int** ASC_column = (int**)malloc((height + 1) * sizeof(int*));
     int** ASC_row = (int**)malloc((height + 1) * sizeof(int*));
-    int** ASC_height = (int**)malloc(5 * sizeof(int*));
+    int ASC_height[10][10] = {0};
     for (int i = 0; i < height + 1; i++) {
         ASC_column[i] = (int*)calloc(10, sizeof(int));
         ASC_row[i] = (int*)calloc(10, sizeof(int));
-        ASC_height[i] = (int*)calloc(10, sizeof(int));
     }
-		printf("동적 할당 완료\n");
+    printf("동적 할당 완료\n");
 
     for (int k = 0; k < height; k++) { // 최대 높이 만큼 반복
         for (int i = 0; i < 10; i++) { // 세로
@@ -36,11 +35,11 @@ void encodeASC(const char* outputFile)
                 }
                 printf("%d%d%d 번째 아스키 코드값 : %d\n", k, i, j, ch);
                 ASC_column[k][j] += ch; // 높이 고정, 가로 j가 증가하면서 해당 행에 대한 값을 더한다
-								printf("ASC_column[%d][%d] : %d\n", k, j, ASC_column[k][j]);
+                printf("ASC_column[%d][%d] : %d\n", k, j, ASC_column[k][j]);
                 ASC_row[k][i] += ch; // 높이 고정, 세로 i가 증가하면서 해당 열에 대한 값을 더한다
-								printf("ASC_row[%d][%d] : %d\n", k, i, ASC_row[k][i]);
+                printf("ASC_row[%d][%d] : %d\n", k, i, ASC_row[k][i]);
                 ASC_height[i][j] += ch;  // 
-								printf("ASC_height[%d][%d] : %d\n\n", i, j, ASC_height[i][j]);
+                printf("ASC_height[%d][%d] : %d\n\n", i, j, ASC_height[i][j]);
             }
         }
     }
@@ -57,7 +56,7 @@ void encodeASC(const char* outputFile)
             ASC_height[height][j] += ch;
         }
     }
-		fclose(output);
+    fclose(output);
     // 인코딩된 값을 파일에 쓰기
     FILE* encodedOutput = fopen(outputFile, "ab");
     if (encodedOutput == NULL) {
@@ -75,11 +74,9 @@ void encodeASC(const char* outputFile)
     for (int i = 0; i < height + 1; i++) {
         free(ASC_column[i]);
         free(ASC_row[i]);
-        free(ASC_height[i]);
     }
     free(ASC_column);
     free(ASC_row);
-    free(ASC_height);
 
     fclose(output);
 }

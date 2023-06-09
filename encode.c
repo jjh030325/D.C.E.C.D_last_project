@@ -12,7 +12,7 @@ void encodeASC(const char* outputFile)
     int size = 0;
     char ch;
     while (fread(&ch, 1, 1, output) == 1) size++; // 파일 전체 사이즈
-		printf("FIEL SIZE : %d\n", size);
+    printf("FIEL SIZE : %d\n", size);
     fseek(output, 0, SEEK_SET);
     int height = size / 100;
 
@@ -51,7 +51,7 @@ void encodeASC(const char* outputFile)
         for (int j = 0; j < 10; j++) {
             if (fread(&ch, 1, 1, output) != 1) {
                 printf(" Read to file end\n");
-								break;
+                break;
             }
             printf("%d%d%d 번째 아스키 코드값 : %d\n", height, i, j, ch);
             ASC_column[height][j] += ch; // 높이 고정, 가로 j가 증가하면서 해당 행에 대한 값을 더한다
@@ -60,7 +60,7 @@ void encodeASC(const char* outputFile)
             printf("ASC_row[%d][%d] : %d\n", height, i, ASC_row[height][i]);
             ASC_height[height][j] += ch;
             printf("ASC_height[%d][%d] : %d\n\n", height, j, ASC_height[height][j]);
-       	}
+        }
     }
     fclose(output);
 
@@ -75,9 +75,9 @@ void encodeASC(const char* outputFile)
         fwrite(ASC_column[k], sizeof(int), 10, encodedOutput);
         fwrite(ASC_row[k], sizeof(int), 10, encodedOutput);
     }
-		for(int k = 0; k < 10; k++){
-				fwrite(ASC_height[k], sizeof(int), 10, encodedOutput);
-		}
+    for (int k = 0; k < 10; k++) {
+        fwrite(ASC_height[k], sizeof(int), 10, encodedOutput);
+    }
     fclose(encodedOutput);
     // 동적 할당된 메모리 해제
     for (int i = 0; i < height + 1; i++) {
@@ -112,10 +112,8 @@ void encodeData(const char* inputFile, const char* outputFile)
         fclose(input);
         return;
     }
-
     char line[256];
-    int section = 0;  // Section identifier (0: User Status, 1: Items, 2: Friends List, 3: Description)
-
+    int section = 0;
     while (fgets(line, sizeof(line), input) != NULL)
     {
         if (line[0] == '*')  // Check for section title
@@ -136,15 +134,15 @@ void encodeData(const char* inputFile, const char* outputFile)
             else if (strcmp(line, "*DESCRIPTION*\n") == 0)
             {
                 section = 3;
+                fwrite("/", sizeof(char), 1, output);
             }
 
             continue;
         }
 
-        // Encode data based on section
         switch (section)
         {
-        case 0:  // User Status
+        case 0:
         {
             if (strncmp(line, "ID: ", 4) == 0)
                 fwrite(line + 4, sizeof(char), strlen(line) - 4, output);
@@ -210,6 +208,9 @@ void encodeData(const char* inputFile, const char* outputFile)
                     removeSubstring(position, "NAME: ");
                     removeSubstring(position, "GENDER: ");
                     removeSubstring(position, "AGE: ");
+
+                    // Replace the first space with "&"
+                    *position = '&';
                 }
             }
 
@@ -223,7 +224,6 @@ void encodeData(const char* inputFile, const char* outputFile)
         }
         }
     }
-
     fclose(input);
     fclose(output);
 }

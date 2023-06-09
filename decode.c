@@ -2,101 +2,65 @@
 #include <stdlib.h>
 #include <string.h>
 
-#define MAX_PLAYER_ITEMS 6
-#define MAX_FRIENDS 5
-#define MAX_DESCRIPTION_LENGTH 100
+void decodeData(const char* inputFile, const char* outputFile)
+{
+    FILE* input = fopen(inputFile, "rb");
+    if (input == NULL)
+    {
+        printf("Failed to open the input file.\n");
+        return;
+    }
 
-// 플레이어 구조체 정의
-typedef struct {
-	int id;
-	char name[20];
-	char gender;
-	int age;
-	int hp;
-	int mp;
-	int coin;
-	int items[MAX_PLAYER_ITEMS];
-	struct {
-		int id;
-		char name[20];
-		char gender;
-		int age;
-	} friends[MAX_FRIENDS];
-	char description[MAX_DESCRIPTION_LENGTH + 1];
-} Player;
+    FILE* output = fopen(outputFile, "w");
+    if (output == NULL)
+    {
+        printf("Failed to open the output file.\n");
+        fclose(input);
+        return;
+    }
 
-// 압축 해제 함수
-void decompress(const char* compressed, char* decompressed) {
-	int length = strlen(compressed);
-	int index = 0;
+    size_t dataSize;
+    while (fread(&dataSize, sizeof(size_t), 1, input) == 1)
+    {
+        char* line = (char*)malloc(dataSize);
+        if (line == NULL)
+        {
+            printf("Failed to allocate memory.\n");
+            fclose(input);
+            fclose(output);
+            return;
+        }
 
-	for (int i = 0; i < length; i += 2) {
-		char current = compressed[i];
-		int count = compressed[i + 1] - '0';
+        fread(line, sizeof(char), dataSize, input);
 
-		for (int j = 0; j < count; j++) {
-			decompressed[index++] = current;
-		}
-	}
+        fwrite(line, sizeof(char), dataSize, output);
 
-	decompressed[index] = '\0';
+        free(line);
+    }
+
+    fclose(input);
+    fclose(output);
 }
 
-// 플레이어 정보 디코딩 함수
-void decodePlayerInfo(FILE* file, Player* player) {
-	// ID
-	fread(&player->id, sizeof(int), 1, file);
+int main(int argc, char* argv[])
+{
+    if (argc != 3)
+    {
+        printf("Usage: ./decoder.out <input_file> <output_file>\n");
+        return 1;
+    }
 
-	// NAME
-	fread(player->name, sizeof(char), sizeof(player->name), file);
+    const char* inputFile = argv[1];
+    const char* outputFile = argv[2];
 
-	// GENDER
-	fread(&player->gender, sizeof(char), 1, file);
+    decodeData(inputFile, outputFile);
 
-	// AGE
-	fread(&player->age, sizeof(int), 1, file);
+    printf("Decoded data saved to '%s'.\n", outputFile);
 
-	// HP
-	fread(&player->hp, sizeof(int), 1, file);
-
-	// MP
-	fread(&player->mp, sizeof(int), 1, file);
-
-	// COIN
-	fread(&player->coin, sizeof(int), 1, file);
-
-	// ITEMS (압축 해제)
-	char compressedItems[MAX_PLAYER_ITEMS * 2 + 1];
-	fread(compressedItems, sizeof(char), sizeof(compressedItems), file);
-	decompress(compressedItems, (char*)player->items);
-
-	// FRIENDS (압축 해제)
-	char compressedFriends[MAX_FRIENDS * (sizeof(int) + sizeof(char[20]) + sizeof(char) + sizeof(int)) * 2 + 1];
-	fread(compressedFriends, sizeof(char), sizeof(compressedFriends), file);
-
-	char friendsData[MAX_FRIENDS * (sizeof(int) + sizeof(char[20]) + sizeof(char) + sizeof(int))];
-	decompress(compressedFriends, friendsData);
-
-	int friendsDataIndex = 0;
-	for (int i = 0; i < MAX_FRIENDS; i++) {
-		memcpy(&(player->friends[i].id), &friendsData[friendsDataIndex], sizeof(int));
-		friendsDataIndex += sizeof(int);
-		memcpy(&(player->friends[i].name), &friendsData[friendsDataIndex], sizeof(char[20]));
-		friendsDataIndex += sizeof(char[20]);
-		memcpy(&(player->friends[i].gender), &friendsData[friendsDataIndex], sizeof(char));
-		friendsDataIndex += sizeof(char);
-		memcpy(&(player->friends[i].age), &friendsData[friendsDataIndex], sizeof(int));
-		friendsDataIndex += sizeof(int);
-	}
-
-	// DESCRIPTION (압축 해제)
-	char compressedDescription[(2 * MAX_DESCRIPTION_LENGTH + 1)];
-	fread(compressedDescription, sizeof(char), sizeof(compressedDescription), file);
-	char decompressedDescription[(2 * MAX_DESCRIPTION_LENGTH + 1)];
-	decompress(compressedDescription, decompressedDescription);
-	strncpy(player->description, decompressedDescription, MAX_DESCRIPTION_LENGTH);
+    return 0;
 }
 
+<<<<<<< HEAD
 // 디코딩 메인 함수
 int decodeMain(const char* filename, const char* outputFilename) {
 	FILE* file = fopen(filename, "rb");
@@ -164,3 +128,5 @@ int main(int argc, char* argv[]) {
 
 	return 0;
 }
+=======
+>>>>>>> 575e448baf14ad2773c62f42ed072a131d0774fe

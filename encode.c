@@ -1,4 +1,3 @@
-#define _CRT_SECURE_NO_WARNINGS
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -12,69 +11,77 @@ void encodeASC(const char* outputFile) {
     int size = 0;
     char ch;
     while (fread(&ch, 1, 1, output) == 1) size++; // 파일 전체 사이즈
+    fseek(output, 0, SEEK_SET);
     int height = size / 100;
 
-    int **ASC_column = (int**)malloc((height + 1) * sizeof(int*));  // 전체 세로 길이 할당
+    size -= 100 * height; // 백자리 제외
+    int** ASC_column = (int**)malloc((height + 1) * sizeof(int*));
+    int** ASC_row = (int**)malloc((height + 1) * sizeof(int*));
+    int** ASC_height = (int**)malloc(10 * sizeof(int*));
     for (int i = 0; i < height + 1; i++) {
-        ASC_column[i] = (int*)calloc(10, sizeof(int)); // 각 행마다 가로 길이 할당
-    }
-
-    int **ASC_row = (int**)malloc((height + 1) * sizeof(int*));
-    for (int i = 0; i < height + 1; i++) {
+        ASC_column[i] = (int*)calloc(10, sizeof(int));
         ASC_row[i] = (int*)calloc(10, sizeof(int));
-    }
-
-    int **ASC_height = (int**)malloc((height + 1) * sizeof(int*));
-    for (int i = 0; i < height + 1; i++) {
         ASC_height[i] = (int*)calloc(10, sizeof(int));
     }
+		printf("동적 할당 완료\n");
 
     for (int k = 0; k < height; k++) { // 최대 높이 만큼 반복
         for (int i = 0; i < 10; i++) { // 세로
             for (int j = 0; j < 10; j++) { // 가로
-                fread(&ch, 1, 1, output); // 한바이트씩 읽어온다
-                ASC_column[k][j] += ch; // 높이는 고정, 가로 j가 증가하면서
-                ASC_row[k][i] += ch; // 높이 고정, 세로 i가 증가하면서 
+                if (fread(&ch, 1, 1, output) != 1) {
+                    printf("Failed to read from output file.\n");
+                    fclose(output);
+                    return;
+                }
+                ASC_column[k][j] += ch; // 높이 고정, 가로 j가 증가하면서 해당 행에 대한 값을 더한다
+								printf("ASC_column[%d][%d] : %d\n", k, j, ASC_column[k][j]);
+                ASC_row[k][i] += ch; // 높이 고정, 세로 i가 증가하면서 해당 열에 대한 값을 더한다
+								printf("ASC_row[%d][%d] : %d\n", k, i, ASC_row[k][i]);
                 ASC_height[i][j] += ch;  // 
+								printf("ASC_height[%d][%d] : %d\n", k, j, ASC_height[i][j]);
+                printf("%d%d%d 번째\n", k, i, j);
             }
         }
     }
-    size -= 100 * height; // 남은 바이트
-    for (int i = 0; i < size / 10; i++) {
+    printf("100단위 값 저장 완료\n");
+    for (int i = 0; i < size / 10; i++) { // 나머지 길이만큼 반복
         for (int j = 0; j < 10; j++) {
-            fread(&ch, 1, 1, output); // 한바이트씩 읽어온다
-            ASC_column[height][j] += ch; // 높이는 고정, 가로 j가 증가하면서
-            ASC_row[height][i] += ch; // 높이 고정, 세로 i가 증가하면서 
-            ASC_height[i][j] += ch;  // 
-        }
-        if ( i + 1 == size / 10 ) {
-            size %= 10;
-            for(int j = 0; j < size; j++){
-                fread(&ch, 1, 1, output); // 한바이트씩 읽어온다
-                ASC_column[height][j] += ch; // 높이는 고정, 가로 j가 증가하면서
-                ASC_row[height][i] += ch; // 높이 고정, 세로 i가 증가하면서 
-                ASC_height[i][j] += ch;  // 
+            if (fread(&ch, 1, 1, output) != 1) {
+                printf("Failed to read from output file.\n");
+                fclose(output);
+                return;
             }
+            ASC_column[height][j] += ch; // 높이 고정, 가로 j가 증가하면서 해당 행에 대한 값을 더한다
+            ASC_row[height][i] += ch; // 높이 고정, 세로 i가 증가하면서 해당 열에 대한 값을 더한다
+            ASC_height[height][j] += ch;
         }
     }
 		fclose(output);
-    output = NULL;
-    FILE* input = fopen(outputFile, "ab");
-    fwrite(ASC_column, sizeof(ASC_column), 1, input);
-    fwrite(ASC_row, sizeof(ASC_row), 1, input);
-    fwrite(ASC_height, sizeof(ASC_height), 1, input);
-    fclose(input);
-    input = NULL;
-
-    for (int i = 0; i < height + 1; i++) free(ASC_column[i]);
+    // 인코딩된 값을 파일에 쓰기
+    FILE* encodedOutput = fopen(outputFile, "ab");
+    if (encodedOutput == NULL) {
+        printf("Failed to open encoded output file.\n");
+        fclose(output);
+        return;
+    }
+    for (int k = 0; k < height + 1; k++) {
+        fwrite(ASC_column[k], sizeof(int), 10, encodedOutput);
+        fwrite(ASC_row[k], sizeof(int), 10, encodedOutput);
+        fwrite(ASC_height[k], sizeof(int), 10, encodedOutput);
+    }
+    fclose(encodedOutput);
+    // 동적 할당된 메모리 해제
+    for (int i = 0; i < height + 1; i++) {
+        free(ASC_column[i]);
+        free(ASC_row[i]);
+        free(ASC_height[i]);
+    }
     free(ASC_column);
-    for (int i = 0; i < height + 1; i++) free(ASC_row[i]);
     free(ASC_row);
-    for (int i = 0; i < height + 1; i++) free(ASC_height[i]);
     free(ASC_height);
-}
 
-void removeSubstring(char* s, const char* toRemove)
+    fclose(output);
+}void removeSubstring(char* s, const char* toRemove)
 {
     char* match = strstr(s, toRemove);
     if (match != NULL)
@@ -232,4 +239,3 @@ int main(int argc, char* argv[])
     printf("Encoded ASC saved to '%s',\n", outputFile);
     return 0;
 }
-

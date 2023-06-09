@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+
 void encodeASC(const char* outputFile)
 {
     FILE* output = fopen(outputFile, "rb");
@@ -87,6 +88,7 @@ void encodeASC(const char* outputFile)
     free(ASC_column);
     free(ASC_row);
 }
+
 void removeSubstring(char* s, const char* toRemove)
 {
     char* match = strstr(s, toRemove);
@@ -112,118 +114,116 @@ void encodeData(const char* inputFile, const char* outputFile)
         fclose(input);
         return;
     }
+
     char line[256];
-    int section = 0;
+    int section = 0;  // Section identifier (0: User Status, 1: Items, 2: Friends List, 3: Description)
+
     while (fgets(line, sizeof(line), input) != NULL)
     {
         if (line[0] == '*')  // Check for section title
         {
             if (strcmp(line, "*USER STATUS*\n") == 0)
-            {
+						{
                 section = 0;
-            }
+						}
             else if (strcmp(line, "*ITEMS*\n") == 0)
-            {
-                section = 1;
-                fwrite("\n", sizeof(char), 1, output);
-            }
+						{
+					  		section = 1;
+								fwrite("\n", sizeof(char), 1, output);
+						}
             else if (strcmp(line, "*FRIENDS LIST*\n") == 0)
-            {
+						{
                 section = 2;
-            }
+						}
             else if (strcmp(line, "*DESCRIPTION*\n") == 0)
-            {
+						{
                 section = 3;
-                fwrite("/", sizeof(char), 1, output);
-            }
+								fwrite("/", sizeof(char), 1, output);
+						}
 
             continue;
         }
 
+        // Encode data based on section
         switch (section)
         {
-        case 0:
-        {
-            if (strncmp(line, "ID: ", 4) == 0)
-                fwrite(line + 4, sizeof(char), strlen(line) - 4, output);
-            else if (strncmp(line, "NAME: ", 6) == 0)
-                fwrite(line + 6, sizeof(char), strlen(line) - 6, output);
-            else if (strncmp(line, "GENDER: ", 8) == 0)
-                fwrite(line + 8, sizeof(char), strlen(line) - 8, output);
-            else if (strncmp(line, "AGE: ", 5) == 0)
-                fwrite(line + 5, sizeof(char), strlen(line) - 5, output);
-            else if (strncmp(line, "HP: ", 4) == 0)
-                fwrite(line + 4, sizeof(char), strlen(line) - 4, output);
-            else if (strncmp(line, "MP: ", 4) == 0)
-                fwrite(line + 4, sizeof(char), strlen(line) - 4, output);
-            else if (strncmp(line, "COIN: ", 6) == 0)
-                fwrite(line + 6, sizeof(char), strlen(line) - 6, output);
+            case 0:  // User Status
+            {
+                if (strncmp(line, "ID: ", 4) == 0)
+                    fwrite(line + 4, sizeof(char), strlen(line) - 4, output);
+                else if (strncmp(line, "NAME: ", 6) == 0)
+                    fwrite(line + 6, sizeof(char), strlen(line) - 6, output);
+                else if (strncmp(line, "GENDER: ", 8) == 0)
+                    fwrite(line + 8, sizeof(char), strlen(line) - 8, output);
+                else if (strncmp(line, "AGE: ", 5) == 0)
+                    fwrite(line + 5, sizeof(char), strlen(line) - 5, output);
+                else if (strncmp(line, "HP: ", 4) == 0)
+                    fwrite(line + 4, sizeof(char), strlen(line) - 4, output);
+                else if (strncmp(line, "MP: ", 4) == 0)
+                    fwrite(line + 4, sizeof(char), strlen(line) - 4, output);
+                else if (strncmp(line, "COIN: ", 6) == 0)
+                    fwrite(line + 6, sizeof(char), strlen(line) - 6, output);
 
-            break;
-        }
-        case 1:  // Items
-        {
-            if (strncmp(line, "BOMB:", 5) == 0)
-            {
-                removeSubstring(line, "BOMB:");
-                fwrite("A", sizeof(char), 1, output);
+                break;
             }
-            else if (strncmp(line, "POTION:", 7) == 0)
+            case 1:  // Items
             {
-                removeSubstring(line, "POTION:");
-                fwrite("P", sizeof(char), 1, output);
-            }
-            else if (strncmp(line, "CURE:", 5) == 0)
-            {
-                removeSubstring(line, "CURE:");
-                fwrite("C", sizeof(char), 1, output);
-            }
-            else if (strncmp(line, "BOOK:", 5) == 0)
-            {
-                removeSubstring(line, "BOOK:");
-                fwrite("B", sizeof(char), 1, output);
-            }
-            else if (strncmp(line, "SHIELD:", 7) == 0)
-            {
-                removeSubstring(line, "SHIELD:");
-                fwrite("S", sizeof(char), 1, output);
-            }
-            else if (strncmp(line, "CANNON:", 7) == 0)
-            {
-                removeSubstring(line, "CANNON:");
-                fwrite("I", sizeof(char), 1, output);
-            }
-            fwrite(line, sizeof(char), strlen(line), output);
-            break;
-        }
-        case 2:  // Friends List
-        {
-            if (strncmp(line, "FRIEND", 6) == 0)
-            {
-                removeSubstring(line, "FRIEND");
-                char* position = strchr(line, ' ');
-                if (position != NULL)
+								if (strncmp(line, "BOMB:", 5) == 0)
                 {
-                    removeSubstring(position, "ID: ");
-                    removeSubstring(position, "NAME: ");
-                    removeSubstring(position, "GENDER: ");
-                    removeSubstring(position, "AGE: ");
-
-                    // Replace the first space with "&"
-                    *position = '&';
-                }
+										removeSubstring(line, "BOMB:");
+										fwrite("A", sizeof(char), 1, output);										
+                }else if(strncmp(line, "POTION:", 7) == 0)
+								{
+										removeSubstring(line, "POTION:");
+										fwrite("P", sizeof(char), 1, output);
+								}else if(strncmp(line, "CURE:", 5) == 0)
+								{
+										removeSubstring(line, "CURE:");
+										fwrite("C", sizeof(char), 1, output);
+								}else if(strncmp(line, "BOOK:", 5) == 0)
+								{
+										removeSubstring(line, "BOOK:");
+										fwrite("B", sizeof(char), 1, output);
+								}else if(strncmp(line, "SHIELD:", 7) == 0)
+								{
+										removeSubstring(line, "SHIELD:");
+										fwrite("S", sizeof(char), 1, output);
+								}else if(strncmp(line, "CANNON:", 7) == 0)
+								{
+										removeSubstring(line, "CANNON:");
+										fwrite("I", sizeof(char), 1, output);
+								}
+                fwrite(line, sizeof(char), strlen(line), output);
+                break;
             }
+            case 2:  // Friends List
+            {
+                if (strncmp(line, "FRIEND", 6) == 0)
+                {
+										removeSubstring(line, "FRIEND");
+                    char* position = strchr(line, ' ');
+                    if (position != NULL)
+                    {
+                        removeSubstring(position, "ID: ");
+                        removeSubstring(position, "NAME: ");
+                        removeSubstring(position, "GENDER: ");
+                        removeSubstring(position, "AGE: ");
 
-            fwrite(line, sizeof(char), strlen(line), output);
-            break;
-        }
-        case 3:  // Description
-        {
-            fwrite(line, sizeof(char), strlen(line), output);
-            break;
-        }
+												// Replace the first space with "&"
+                    		*position = '&';
+                    }
+                }
+								fwrite(line, sizeof(char), strlen(line), output);
+                break;
+            }
+            case 3:  // Description
+            {
+                fwrite(line, sizeof(char), strlen(line), output);
+                break;
+            }
         }
     }
+
     fclose(input);
     fclose(output);
 }

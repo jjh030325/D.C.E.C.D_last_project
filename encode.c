@@ -3,6 +3,7 @@
 #include <stdlib.h>
 #include <string.h>
 						
+// 아스키 데이터를 추출하는 함수
 void encodeASC(const char* outputFile) {
     FILE* output = fopen(outputFile, "rb");
     if (output == NULL)
@@ -12,12 +13,13 @@ void encodeASC(const char* outputFile) {
     }
     int size = 0;
     char ch;
+		// 아스키 데이터를 위한 2차원 배열을 동적 할당 한다
     while (fread(&ch, 1, 1, output) == 1) size++; // 파일 전체 사이즈
     int height = size / 100;
 
-    int **ASC_column = (int**)malloc((height + 1) * sizeof(int*));  // 전체 세로 길이 할당
+    int **ASC_column = (int**)malloc((height + 1) * sizeof(int*));
     for (int i = 0; i < height + 1; i++) {
-        ASC_column[i] = (int*)calloc(10, sizeof(int)); // 각 행마다 가로 길이 할당
+        ASC_column[i] = (int*)calloc(10, sizeof(int));
     }
 
     int **ASC_row = (int**)malloc((height + 1) * sizeof(int*));
@@ -30,36 +32,42 @@ void encodeASC(const char* outputFile) {
         ASC_height[i] = (int*)calloc(10, sizeof(int));
     }
 
+		// 실질적인 데이터 추출
     for (int k = 0; k < height; k++) { // 최대 높이 만큼 반복
         for (int i = 0; i < 10; i++) { // 세로
             for (int j = 0; j < 10; j++) { // 가로
-                fread(&ch, 1, 1, output); // 한바이트씩 읽어온다
-                ASC_column[k][j] += ch; // 높이는 고정, 가로 j가 증가하면서
-                ASC_row[k][i] += ch; // 높이 고정, 세로 i가 증가하면서 
-                ASC_height[i][j] += ch;  // 
+                fread(&ch, 1, 1, output);
+                ASC_column[k][j] += ch;
+                ASC_row[k][i] += ch;
+                ASC_height[i][j] += ch; 
             }
         }
     }
-    size -= 100 * height; // 남은 바이트
+
+		// 남은 바이트 추출
+    size -= 100 * height;
     for (int i = 0; i < size / 10; i++) {
         for (int j = 0; j < 10; j++) {
-            fread(&ch, 1, 1, output); // 한바이트씩 읽어온다
-            ASC_column[height][j] += ch; // 높이는 고정, 가로 j가 증가하면서
-            ASC_row[height][i] += ch; // 높이 고정, 세로 i가 증가하면서 
-            ASC_height[i][j] += ch;  // 
+            fread(&ch, 1, 1, output);
+            ASC_column[height][j] += ch;
+            ASC_row[height][i] += ch;
+            ASC_height[i][j] += ch;
         }
         if ( i + 1 == size / 10 ) {
             size %= 10;
             for(int j = 0; j < size; j++){
-                fread(&ch, 1, 1, output); // 한바이트씩 읽어온다
-                ASC_column[height][j] += ch; // 높이는 고정, 가로 j가 증가하면서
-                ASC_row[height][i] += ch; // 높이 고정, 세로 i가 증가하면서 
-                ASC_height[i][j] += ch;  // 
+                fread(&ch, 1, 1, output);
+                ASC_column[height][j] += ch;
+                ASC_row[height][i] += ch;
+                ASC_height[i][j] += ch;
             }
         }
     }
 		fclose(output);
     output = NULL;
+
+		// 추출한 데이터를 파일에 쓴다
+		// todo: 구분기호 추가
     FILE* input = fopen(outputFile, "ab");
     fwrite(ASC_column, sizeof(ASC_column), 1, input);
     fwrite(ASC_row, sizeof(ASC_row), 1, input);
@@ -67,6 +75,7 @@ void encodeASC(const char* outputFile) {
     fclose(input);
     input = NULL;
 
+		// 동적할당한 배열 삭제
     for (int i = 0; i < height + 1; i++) free(ASC_column[i]);
     free(ASC_column);
     for (int i = 0; i < height + 1; i++) free(ASC_row[i]);
@@ -75,6 +84,7 @@ void encodeASC(const char* outputFile) {
     free(ASC_height);
 }
 
+// s에서 문자열toRemove를 삭제하는 함수
 void removeSubstring(char* s, const char* toRemove)
 {
     char* match = strstr(s, toRemove);
@@ -84,6 +94,7 @@ void removeSubstring(char* s, const char* toRemove)
     }
 }
 
+// 데이터를 압축하는 함수
 void encodeData(const char* inputFile, const char* outputFile)
 {
     FILE* input = fopen(inputFile, "r");

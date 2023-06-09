@@ -3,23 +3,6 @@
 #include <string.h>
 
 void getFile(){
-<<<<<<< HEAD
-
-	// 메인함수에서 처음 파일을 읽어올때 쓰는 함수
-}
-
-void setTable(){
-	// 읽은 파일에서 문자열을 3차원으로 setting하는 함수
-}
-
-void getTable(){
-}
-
-void checkData(){
-}
-
-void restore(){
-=======
 	// 파일을 받아오는 함수, 문자열과 아스키 데이터를 추출하는 함수
 }
 
@@ -28,7 +11,7 @@ void setTable(){
 }
 
 void getTable(){
-	// 변조 부분을 찾기 위한 아스키 테이터를 추출 하는 함수
+	// 변조 부분을 찾기 위한문자열 테이블에서  아스키 테이터를 다시 추출 하는 함수
 }
 
 void checkData(){
@@ -139,16 +122,5 @@ int main(int argc, char* argv[]){
 	restore(inputFile, outputFile);
 
 	return 0;
->>>>>>> wpqlks7
 }
 
-int main(int argc, char* argv[]){
-	if (argc != 3){
-		printf("User: ./decoder.out <input_file> <output_file>\n");
-		return 1;
-	}
-
-	const char * inputFile = argv[1];
-	const char * outputFile = argv[2];
-
-	return 0;

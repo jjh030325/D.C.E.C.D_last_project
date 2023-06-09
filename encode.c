@@ -121,10 +121,12 @@ void encodeData(const char* inputFile, const char* outputFile)
                         removeSubstring(position, "NAME: ");
                         removeSubstring(position, "GENDER: ");
                         removeSubstring(position, "AGE: ");
+
+												// Replace the first space with "&"
+                    		*position = '&';
                     }
                 }
-
-                fwrite(line, sizeof(char), strlen(line), output);
+								fwrite(line, sizeof(char), strlen(line), output);
                 break;
             }
             case 3:  // Description

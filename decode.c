@@ -154,7 +154,9 @@ void restore(const char* inputFile, const char* outputFile){
                 fseek(textFile, -1, SEEK_CUR);
                 fprintf(textFile, "*DESCRIPTION*\n");
                 isFirstItem++;
-            }else if(ch == ' ') {
+            }else if(ch == '&') {
+								fseek(textFile, -1, SEEK_CUR);
+								fprintf(textFile, " ");
 								switch(friend_check)
 								{
 										case 0:

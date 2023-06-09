@@ -1,0 +1,12 @@
+
+int main()
+{
+    const char* inputFile = "code.txt";
+    const char* outputFile = "output.txt";
+    const char* ASCputFile = "ASC.txt";
+    encodeData(inputFile, outputFile);
+    printf("Encoded data saved to '%s'.\n", outputFile);
+    encodeASC(outputFile);
+    printf("Encoded ASC saved to '%s',\n", ASCputFile);
+    return 0;
+}

@@ -1,7 +1,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-void encodeASC(const char* outputFile) {
+void encodeASC(const char* outputFile) 
+{
     FILE* output = fopen(outputFile, "rb");
     if (output == NULL)
     {
@@ -17,7 +18,7 @@ void encodeASC(const char* outputFile) {
     size -= 100 * height; // 백자리 제외
     int** ASC_column = (int**)malloc((height + 1) * sizeof(int*));
     int** ASC_row = (int**)malloc((height + 1) * sizeof(int*));
-    int** ASC_height = (int**)malloc(10 * sizeof(int*));
+    int** ASC_height = (int**)malloc(5 * sizeof(int*));
     for (int i = 0; i < height + 1; i++) {
         ASC_column[i] = (int*)calloc(10, sizeof(int));
         ASC_row[i] = (int*)calloc(10, sizeof(int));
@@ -33,13 +34,13 @@ void encodeASC(const char* outputFile) {
                     fclose(output);
                     return;
                 }
+                printf("%d%d%d 번째 아스키 코드값 : %d\n", k, i, j, ch);
                 ASC_column[k][j] += ch; // 높이 고정, 가로 j가 증가하면서 해당 행에 대한 값을 더한다
 								printf("ASC_column[%d][%d] : %d\n", k, j, ASC_column[k][j]);
                 ASC_row[k][i] += ch; // 높이 고정, 세로 i가 증가하면서 해당 열에 대한 값을 더한다
 								printf("ASC_row[%d][%d] : %d\n", k, i, ASC_row[k][i]);
                 ASC_height[i][j] += ch;  // 
-								printf("ASC_height[%d][%d] : %d\n", k, j, ASC_height[i][j]);
-                printf("%d%d%d 번째\n", k, i, j);
+								printf("ASC_height[%d][%d] : %d\n\n", i, j, ASC_height[i][j]);
             }
         }
     }
@@ -81,7 +82,8 @@ void encodeASC(const char* outputFile) {
     free(ASC_height);
 
     fclose(output);
-}void removeSubstring(char* s, const char* toRemove)
+}
+void removeSubstring(char* s, const char* toRemove)
 {
     char* match = strstr(s, toRemove);
     if (match != NULL)

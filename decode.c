@@ -21,6 +21,7 @@ void checkData(){
 void dataRestore(){
 	// 바이너리 파일 복원 함수
 }
+<<<<<<< HEAD
 
 //파일 복원 함수
 void restore(const char* inputFile, const char* outputFile){
@@ -200,3 +201,5 @@ int main(int argc, char* argv[]){
 
 	return 0;
 }
+=======
+>>>>>>> a45c75311ed738affe521eb49f9118130f7d523c

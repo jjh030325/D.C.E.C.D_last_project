@@ -132,6 +132,14 @@ void restore(const char* inputFile, const char* outputFile){
 						}
         }
     }
+		if (isFirstItem == 3) {
+				if (newlineCount == 0) {
+						if (ch == '/') {
+								fseek(textFile, -1, SEEK_CUR);
+								fprintf(textFile, "*DESCRIPTION*\n");
+                }
+				}
+		}
 	}
 
 	// 파일 닫기

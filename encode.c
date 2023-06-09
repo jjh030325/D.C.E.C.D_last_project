@@ -51,6 +51,7 @@ void encodeData(const char* inputFile, const char* outputFile)
             else if (strcmp(line, "*DESCRIPTION*\n") == 0)
 						{
                 section = 3;
+								fwrite("/", sizeof(char), 1, output);
 						}
 
             continue;

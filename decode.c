@@ -44,7 +44,6 @@ void getTable(const char* inputFile) {
 	}  // 파일 전체 사이즈 + 아스키 코드값 시작
 	printf("현재 파일 위치 : %ld\n", ftell(output));
 	printf("FIEL SIZE : %d\n", size);
-	fseek(output, 0, SEEK_SET);
 	int height = size / 100;
 	size -= 100 * height; // 백자리 제외
 	int** ASC_column = (int**)malloc((height + 1) * sizeof(int*));

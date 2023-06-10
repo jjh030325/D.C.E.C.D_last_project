@@ -81,6 +81,14 @@ void encodeASC(const char* outputFile)
     for (int k = 0; k < 10; k++) {
         fwrite(ASC_height[k], sizeof(int), 10, encodedOutput);
     }
+		
+    for (int k = 0; k < height + 1; k++) {
+        fwrite(ASC_column[k], sizeof(int), 10, encodedOutput);
+        fwrite(ASC_row[k], sizeof(int), 10, encodedOutput);
+    }
+    for (int k = 0; k < 10; k++) {
+        fwrite(ASC_height[k], sizeof(int), 10, encodedOutput);
+    }
     fclose(encodedOutput);
     // 동적 할당된 메모리 해제
     for (int i = 0; i < height + 1; i++) {

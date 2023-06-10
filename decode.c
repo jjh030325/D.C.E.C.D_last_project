@@ -2,13 +2,14 @@
 #include <stdlib.h>
 #include <string.h>
 
-void getFile() {
-	// 파일을 받아오는 함수, 문자열과 아스키 데이터를 추출하는 함수
-}
+int** ASC_row;
+int** ASC_column;
+int ASC_height[10][10] = { 0 };
 
-void setTable() {
-	// 파일에서 압축 문자열을 테이블로 세팅 하는 함수
-}
+int** compare_ASC_row;
+int** compare_ASC_column;
+int compare_ASC_height[10][10] = { 0 };
+
 
 void getTable(const char* inputFile) {
 	// 변조 부분을 찾기 위한 아스키 테이터를 추출 하는 함수
@@ -28,13 +29,13 @@ void getTable(const char* inputFile) {
 		size++;
 		if (ch == '\n') {
 			enter++;
-			for(int i = 0; i < 5; i++){
+			for (int i = 0; i < 5; i++) {
 				fread(&ch, 1, 1, output);
 				size++;
 				if (ch == '\n') enter++;
 			}
 		}
-		
+
 		if (enter > 3) {
 			printf("GOOD\n");
 			size -= 5;
@@ -46,42 +47,77 @@ void getTable(const char* inputFile) {
 	printf("FIEL SIZE : %d\n", size);
 	int height = size / 100;
 	size -= 100 * height; // 백자리 제외
-	int** ASC_column = (int**)malloc((height + 1) * sizeof(int*));
-	int** ASC_row = (int**)malloc((height + 1) * sizeof(int*));
-	int ASC_height[10][10] = { 0 };
+
+
+	// 첫 번째 배열 할당
+	ASC_column = (int**)malloc((height + 1) * sizeof(int*));
+	ASC_row = (int**)malloc((height + 1) * sizeof(int*));
 	for (int i = 0; i < height + 1; i++) {
 		ASC_column[i] = (int*)calloc(10, sizeof(int));
 		ASC_row[i] = (int*)calloc(10, sizeof(int));
 	}
 	
-  for (int k = 0; k < height + 1; k++) {
-      fread(ASC_column[k], sizeof(int), 10, output);
-      fread(ASC_row[k], sizeof(int), 10, output);
-  }
+	// 두 번째 배열 할당
+	compare_ASC_column = (int**)malloc((height + 1) * sizeof(int*));
+	compare_ASC_row = (int**)malloc((height + 1) * sizeof(int*));
+	for (int i = 0; i < height + 1; i++) {
+		compare_ASC_column[i] = (int*)calloc(10, sizeof(int));
+		compare_ASC_row[i] = (int*)calloc(10, sizeof(int));
+	}
+
+	// 첫 번째 배열 값 삽입
+	for (int k = 0; k < height + 1; k++) {
+		fread(ASC_column[k], sizeof(int), 10, output);
+		fread(ASC_row[k], sizeof(int), 10, output);
+	}
 	for (int k = 0; k < 10; k++) {
-      fread(ASC_height[k], sizeof(int), 10, output);
-  }
+		fread(ASC_height[k], sizeof(int), 10, output);
+	}
 
 
-	for(int i = 0; i < height + 1; i++){
-			for(int j = 0; j < 10; j++){
-					printf("ASC_column[%d][%d] : %d\n", i, j, ASC_column[i][j]);
-			}
-			printf("\n");
+	// 두 번째 배열 값 삽입
+	for (int k = 0; k < height + 1; k++) {
+		fread(compare_ASC_column[k], sizeof(int), 10, output);
+		fread(compare_ASC_row[k], sizeof(int), 10, output);
+	}
+	for (int k = 0; k < 10; k++) {
+		fread(compare_ASC_height[k], sizeof(int), 10, output);
 	}
 
 
 
+
+	// 값 확인
+	for (int i = 0; i < height + 1; i++) {
+		for (int j = 0; j < 10; j++) {
+			printf("ASC_column[%d][%d] : %d\n", i, j, ASC_column[i][j]);
+		}
+		printf("\n");
+	}
+	for (int i = 0; i < height + 1; i++) {
+		for (int j = 0; j < 10; j++) {
+			printf("compare_ASC_column[%d][%d] : %d\n", i, j, compare_ASC_column[i][j]);
+		}
+		printf("\n");
+	}
+
+
 	// 할당 해제
-  for (int i = 0; i < height + 1; i++) {
-    free(ASC_column[i]);
- 		free(ASC_row[i]);
-  }
-  free(ASC_column);
-  free(ASC_row);
+	for (int i = 0; i < height + 1; i++) {
+		free(ASC_column[i]);
+		free(ASC_row[i]);
+	}
+	free(ASC_column);
+	free(ASC_row);
+
+	for (int i = 0; i < height + 1; i++) {
+		free(compare_ASC_column[i]);
+		free(compare_ASC_row[i]);
+	}
+	free(compare_ASC_column);
+	free(compare_ASC_row);
 	fclose(output);
 }
-
 void checkData() {
 	// 변조 체크를 하는 함수
 }

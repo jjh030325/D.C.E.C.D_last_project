@@ -73,6 +73,7 @@ void encodeASC(const char* outputFile)
         fclose(output);
         return;
     }
+		printf("덧붙여 쓰기 시작 위치 : %ld\n", ftell(encodedOutput));
     for (int k = 0; k < height + 1; k++) {
         fwrite(ASC_column[k], sizeof(int), 10, encodedOutput);
         fwrite(ASC_row[k], sizeof(int), 10, encodedOutput);

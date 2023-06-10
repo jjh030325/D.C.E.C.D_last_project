@@ -30,6 +30,7 @@ void getTable(const char* inputFile) {
 			enter++;
 			for(int i = 0; i < 5; i++){
 				fread(&ch, 1, 1, output);
+				size++;
 				if (ch == '\n') enter++;
 			}
 		}
@@ -40,8 +41,8 @@ void getTable(const char* inputFile) {
 			break;
 		}
 		enter = 0;
-	}  // 파일 전체 사이즈
-
+	}  // 파일 전체 사이즈 + 아스키 코드값 시작
+	printf("현재 파일 위치 : %ld\n", ftell(output));
 	printf("FIEL SIZE : %d\n", size);
 	fseek(output, 0, SEEK_SET);
 	int height = size / 100;
@@ -53,7 +54,32 @@ void getTable(const char* inputFile) {
 		ASC_column[i] = (int*)calloc(10, sizeof(int));
 		ASC_row[i] = (int*)calloc(10, sizeof(int));
 	}
+	
+  for (int k = 0; k < height + 1; k++) {
+      fread(ASC_column[k], sizeof(int), 10, output);
+      fread(ASC_row[k], sizeof(int), 10, output);
+  }
+	for (int k = 0; k < 10; k++) {
+      fread(ASC_height[k], sizeof(int), 10, output);
+  }
 
+
+	for(int i = 0; i < height + 1; i++){
+			for(int j = 0; j < 10; j++){
+					printf("ASC_column[%d][%d] : %d\n", i, j, ASC_column[i][j]);
+			}
+			printf("\n");
+	}
+
+
+
+	// 할당 해제
+  for (int i = 0; i < height + 1; i++) {
+    free(ASC_column[i]);
+ 		free(ASC_row[i]);
+  }
+  free(ASC_column);
+  free(ASC_row);
 	fclose(output);
 }
 

@@ -50,7 +50,7 @@ void encodeASC(const char* outputFile)
 
 
     for (int i = 0; i < size / 10 + 1; i++) { // 나머지 길이만큼 반복
-        for (int j = 0; j < 10; j++) {
+        for (int j = 0; j < size % 10; j++) {
             if (fread(&ch, 1, 1, output) != 1) {
                 printf(" Read to file end\n");
                 break;

@@ -10,6 +10,25 @@ int** compare_ASC_row;
 int** compare_ASC_column;
 int compare_ASC_height[10][10] = { 0 };
 
+char* compress_str;
+char* compare_compress_str;
+
+int size = 0;
+int height;
+
+typedef struct{
+	int row;
+	int column;
+	int height;
+	char ch;
+}Char_veriable; // 변조된 압축문자에 대한 정보
+
+typedef struct{
+	int xpos;
+	int ypos;
+	char type; // r = ASC_row, c = ASC_column, h = ASC_height
+}ASC_veriable; // 변조된 아스키데이터에 대한 정보
+
 // 아스키 배열들을 추출하기 위한 함수
 // !@#$%^ 순으로 마지막에 적힌 문자열을 고려해서
 // 알고리즘 구현
@@ -22,7 +41,6 @@ void getTable(const char* inputFile) {
 
 
 	// 2차원 배열 할당 받기 + 마지막 줄 찾기
-	int size = 0; // 압축된 문자열 길이
 	int symbol = 0; // 특수기호 발견 시 카운트
 	char ch;
 	while (1) { // 파일 전체를 읽기 위한 루프문
@@ -94,10 +112,12 @@ void getTable(const char* inputFile) {
 	}
 	size -= 6;
 	size = size / 2;
+	size -= 1;
+
 	fseek(output, 4, SEEK_CUR);
 	printf("현재 파일 위치 : %ld\n", ftell(output));
 	printf("FIEL SIZE : %d\n", size);
-	int height = size / 100;
+	height = size / 100;
 	size -= 100 * height; // 백자리 제외
 
 
@@ -136,10 +156,19 @@ void getTable(const char* inputFile) {
 		fread(compare_ASC_height[k], sizeof(int), 10, output);
 	}
 
-
-
-
+	size += 100 * height;
+	// 압축된 문자열 배열 할당 + 값삽입
+	fseek(output, 0, SEEK_SET);
+	compress_str = (char*)calloc(size, sizeof(int));
+	compare_compress_str = (char*)calloc(size, sizeof(int));
+	
+	fread(compress_str, 1, size, output);
+	fseek(output, 1, SEEK_CUR);
+	fread(compare_compress_str, 1, size, output);
+	compress_str[size] = '\n';
+	compare_compress_str[size] = '\n';
 	// 값 확인
+	/*
 	for (int i = 0; i < height + 1; i++) {
 		for (int j = 0; j < 10; j++) {
 			printf("ASC_column[%d][%d] : %d\n", i, j, ASC_column[i][j]);
@@ -152,26 +181,14 @@ void getTable(const char* inputFile) {
 		}
 		printf("\n");
 	}
-
-
-	// 할당 해제
-	for (int i = 0; i < height + 1; i++) {
-		free(ASC_column[i]);
-		free(ASC_row[i]);
-	}
-	free(ASC_column);
-	free(ASC_row);
-
-	for (int i = 0; i < height + 1; i++) {
-		free(compare_ASC_column[i]);
-		free(compare_ASC_row[i]);
-	}
-	free(compare_ASC_column);
-	free(compare_ASC_row);
+	*/
+	//printf("compress_str : %s\n", compress_str);
+	//printf("compare_compress_str : %s\n", compare_compress_str);
 	fclose(output);
 }
 void checkData() {
-	// 변조 체크를 하는 함수
+	
+
 }
 
 void dataRestore() {
@@ -355,7 +372,28 @@ int main(int argc, char* argv[]) {
 
 	const char* inputFile = argv[1];
 	const char* outputFile = argv[2];
-	//restore(inputFile, outputFile);
+	restore(inputFile, outputFile);
 	getTable(inputFile);
+	// 할당 해제
+	/*
+	for (int i = 0; i < height + 1; i++) {
+		free(ASC_column[i]);
+		free(ASC_row[i]);
+	}
+	free(ASC_column);
+	free(ASC_row);
+
+	for (int i = 0; i < height + 1; i++) {
+		free(compare_ASC_column[i]);
+		free(compare_ASC_row[i]);
+	}
+	free(compare_ASC_column);
+	free(compare_ASC_row);
+	*/
+
+
+	free(compress_str);
+	free(compare_compress_str);
+
 	return 0;
 }

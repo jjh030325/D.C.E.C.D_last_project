@@ -2,32 +2,37 @@
 #include <stdlib.h>
 #include <string.h>
 
-int** ASC_row;
-int** ASC_column;
+int** ASC_row = NULL;
+int** ASC_column = NULL;
 int ASC_height[10][10] = { 0 };
 
-int** compare_ASC_row;
-int** compare_ASC_column;
+int** compare_ASC_row = NULL;
+int** compare_ASC_column = NULL;
 int compare_ASC_height[10][10] = { 0 };
 
-char* compress_str;
-char* compare_compress_str;
+char* compress_str = NULL;
+char* compare_compress_str = NULL;
 
 int size = 0;
-int height;
-
-typedef struct{
+int height = 0;
+int V_ASC_count = 0;
+int V_Char_count = 0;
+// 인덱스 0부터 시작 되는 값을 그대로 받는다 배열에 그대로 가져다 쓰면 됨,
+typedef struct {
 	int row;
 	int column;
 	int height;
 	char ch;
-}Char_veriable; // 변조된 압축문자에 대한 정보
+}Char_variable; // 변조된 압축문자에 대한 정보
 
-typedef struct{
+typedef struct {
 	int xpos;
 	int ypos;
 	char type; // r = ASC_row, c = ASC_column, h = ASC_height
-}ASC_veriable; // 변조된 아스키데이터에 대한 정보
+}ASC_variable; // 변조된 아스키데이터에 대한 정보
+
+Char_variable* Cvar = NULL;
+ASC_variable* Avar = NULL;
 
 // 아스키 배열들을 추출하기 위한 함수
 // !@#$%^ 순으로 마지막에 적힌 문자열을 고려해서
@@ -117,7 +122,7 @@ void getTable(const char* inputFile) {
 	fseek(output, 4, SEEK_CUR);
 	printf("현재 파일 위치 : %ld\n", ftell(output));
 	printf("FIEL SIZE : %d\n", size);
-	height = size / 100;
+	height = size / 100; // 0층부터 시작
 	size -= 100 * height; // 백자리 제외
 
 
@@ -161,7 +166,7 @@ void getTable(const char* inputFile) {
 	fseek(output, 0, SEEK_SET);
 	compress_str = (char*)calloc(size, sizeof(int));
 	compare_compress_str = (char*)calloc(size, sizeof(int));
-	
+
 	fread(compress_str, 1, size, output);
 	fseek(output, 1, SEEK_CUR);
 	fread(compare_compress_str, 1, size, output);
@@ -184,11 +189,82 @@ void getTable(const char* inputFile) {
 	*/
 	//printf("compress_str : %s\n", compress_str);
 	//printf("compare_compress_str : %s\n", compare_compress_str);
+	printf("getTable 성공\n");
 	fclose(output);
 }
 void checkData() {
-	
+	// 압축된 문자열에서 변조 확인 확인 
 
+
+	for (int i = 0; i < size; i++) {
+		if (compare_compress_str[i] != compress_str[i]) {
+			V_ASC_count++;
+			Cvar = (Char_variable*)malloc(sizeof(Char_variable));
+			Cvar->ch = compress_str[i];
+			Cvar->height = i /100 + 1;
+			if (i / 100 == 0) {
+				Cvar->row = i / 10;
+				Cvar->column = i % 10;
+			}
+			else {
+				i -= 100 * height;
+				Cvar->row = i / 10;
+				Cvar->column = i % 10;
+			}
+		}
+	}
+	
+	/*
+	//아스키 데이터에서 변조 확인
+	for (int i = 0; i < height + 1; i++) {
+		for (int j = 0; j < 10; j++) {
+			if (compare_ASC_column[i][j] != ASC_column[i][j]) {
+				V_Char_count++;
+				Avar = (ASC_variable*)malloc(sizeof(ASC_variable));
+				Avar->type = 'c';
+				Avar->xpos = j;
+				Avar->ypos = i;
+			}
+
+			if (compare_ASC_row[i][j] != ASC_row[i][j]) {
+				V_Char_count++;
+				Avar = (ASC_variable*)malloc(sizeof(ASC_variable));
+				Avar->type = 'r';
+				Avar->xpos = j;
+				Avar->ypos = i;
+			}
+		}
+	}
+	for (int i = 0; i < 10; i++) {
+		for (int j = 0; j < 10; j++) {
+			if (compare_ASC_height[i][j] != ASC_height[i][j]) {
+				V_Char_count++;
+				Avar = (ASC_variable*)malloc(sizeof(ASC_variable));
+				Avar->type = 'h';
+				Avar->xpos = j;
+				Avar->ypos = i;
+			}
+		}
+	}
+
+
+
+
+
+	for (int i = 0; i < V_ASC_count; i++) {
+		printf("--------------------------\n");
+		printf("type -> %c\n", Avar[i].type);
+		printf("xpos -> %d\n", Avar[i].xpos);
+		printf("ypos - > %d\n", Avar[i].ypos);
+	}
+	*/
+	for (int i = 0; i < V_Char_count; i++) {
+		printf("--------------------------\n");
+		printf("ch -> %c\n", Cvar[i].ch);
+		printf("row -> %d\n", Cvar[i].row);
+		printf("column - > %d\n", Cvar[i].column);
+		printf("height - > %d\n", Cvar[i].height);
+	}
 }
 
 void dataRestore() {
@@ -374,8 +450,9 @@ int main(int argc, char* argv[]) {
 	const char* outputFile = argv[2];
 	restore(inputFile, outputFile);
 	getTable(inputFile);
+	checkData();
+
 	// 할당 해제
-	/*
 	for (int i = 0; i < height + 1; i++) {
 		free(ASC_column[i]);
 		free(ASC_row[i]);
@@ -389,8 +466,6 @@ int main(int argc, char* argv[]) {
 	}
 	free(compare_ASC_column);
 	free(compare_ASC_row);
-	*/
-
 
 	free(compress_str);
 	free(compare_compress_str);

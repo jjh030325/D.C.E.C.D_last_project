@@ -31,8 +31,8 @@ typedef struct {
 	char type; // r = ASC_row, c = ASC_column, h = ASC_height
 }ASC_variable; // 변조된 아스키데이터에 대한 정보
 
-Char_variable* Cvar = NULL;
-ASC_variable* Avar = NULL;
+Char_variable* Cvar;
+ASC_variable* Avar;
 
 // 아스키 배열들을 추출하기 위한 함수
 // !@#$%^ 순으로 마지막에 적힌 문자열을 고려해서
@@ -187,51 +187,61 @@ void getTable(const char* inputFile) {
 		printf("\n");
 	}
 	*/
-	//printf("compress_str : %s\n", compress_str);
-	//printf("compare_compress_str : %s\n", compare_compress_str);
+	printf("compress_str : %s\n", compress_str);
+	printf("compare_compress_str : %s\n", compare_compress_str);
 	printf("getTable 성공\n");
 	fclose(output);
+	output = NULL;
 }
 void checkData() {
 	// 압축된 문자열에서 변조 확인 확인 
+
+	Cvar = (Char_variable*)malloc(sizeof(Char_variable) * 4);
+	Avar = (ASC_variable*)malloc(sizeof(ASC_variable) * 4);
 
 
 	for (int i = 0; i < size; i++) {
 		if (compare_compress_str[i] != compress_str[i]) {
 			V_ASC_count++;
-			Cvar = (Char_variable*)malloc(sizeof(Char_variable));
-			Cvar->ch = compress_str[i];
-			Cvar->height = i /100 + 1;
+			Cvar[V_ASC_count - 1].ch = compress_str[i];
+			Cvar[V_ASC_count - 1].height = i /100;
 			if (i / 100 == 0) {
-				Cvar->row = i / 10;
-				Cvar->column = i % 10;
+				Cvar[V_ASC_count - 1].row = i / 10;
+				Cvar[V_ASC_count - 1].column = i % 10;
 			}
 			else {
-				i -= 100 * height;
-				Cvar->row = i / 10;
-				Cvar->column = i % 10;
+				int j = i;
+				if (height == 1) {
+					j -= 100;
+					Cvar[V_ASC_count - 1].row = j / 10;
+					Cvar[V_ASC_count - 1].column = j % 10;
+				}
+				else {
+					j -= 100 * (height-1);
+					Cvar[V_ASC_count - 1].row = j / 10;
+					Cvar[V_ASC_count - 1].column = j % 10;
+				}
 			}
 		}
 	}
+	printf("통과\n");
 	
-	/*
+	
 	//아스키 데이터에서 변조 확인
 	for (int i = 0; i < height + 1; i++) {
 		for (int j = 0; j < 10; j++) {
 			if (compare_ASC_column[i][j] != ASC_column[i][j]) {
 				V_Char_count++;
-				Avar = (ASC_variable*)malloc(sizeof(ASC_variable));
-				Avar->type = 'c';
-				Avar->xpos = j;
-				Avar->ypos = i;
+				Avar[V_Char_count - 1].type = 'c';
+				Avar[V_Char_count - 1].xpos = j;
+				Avar[V_Char_count - 1].ypos = i;
 			}
 
 			if (compare_ASC_row[i][j] != ASC_row[i][j]) {
 				V_Char_count++;
-				Avar = (ASC_variable*)malloc(sizeof(ASC_variable));
-				Avar->type = 'r';
-				Avar->xpos = j;
-				Avar->ypos = i;
+				Avar[V_Char_count - 1].type = 'r';
+				Avar[V_Char_count - 1].xpos = j;
+				Avar[V_Char_count - 1].ypos = i;
 			}
 		}
 	}
@@ -239,31 +249,28 @@ void checkData() {
 		for (int j = 0; j < 10; j++) {
 			if (compare_ASC_height[i][j] != ASC_height[i][j]) {
 				V_Char_count++;
-				Avar = (ASC_variable*)malloc(sizeof(ASC_variable));
-				Avar->type = 'h';
-				Avar->xpos = j;
-				Avar->ypos = i;
+				Avar[V_Char_count - 1].type = 'h';
+				Avar[V_Char_count - 1].xpos = j;
+				Avar[V_Char_count - 1].ypos = i;
 			}
 		}
 	}
 
 
 
-
-
-	for (int i = 0; i < V_ASC_count; i++) {
-		printf("--------------------------\n");
-		printf("type -> %c\n", Avar[i].type);
-		printf("xpos -> %d\n", Avar[i].xpos);
-		printf("ypos - > %d\n", Avar[i].ypos);
-	}
-	*/
 	for (int i = 0; i < V_Char_count; i++) {
 		printf("--------------------------\n");
 		printf("ch -> %c\n", Cvar[i].ch);
 		printf("row -> %d\n", Cvar[i].row);
 		printf("column - > %d\n", Cvar[i].column);
 		printf("height - > %d\n", Cvar[i].height);
+	}
+
+	for (int i = 0; i < V_ASC_count; i++) {
+		printf("--------------------------\n");
+		printf("type -> %c\n", Avar[i].type);
+		printf("xpos -> %d\n", Avar[i].xpos);
+		printf("ypos - > %d\n", Avar[i].ypos);
 	}
 }
 
@@ -450,7 +457,7 @@ int main(int argc, char* argv[]) {
 	const char* outputFile = argv[2];
 	restore(inputFile, outputFile);
 	getTable(inputFile);
-	checkData();
+	//checkData();
 
 	// 할당 해제
 	for (int i = 0; i < height + 1; i++) {

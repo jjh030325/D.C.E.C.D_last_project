@@ -13,8 +13,10 @@ void encodeASC(const char* outputFile)
     int size = 0;
     char ch;
     while (fread(&ch, 1, 1, output) == 1) size++; // 파일 전체 사이즈
-    size -= 5;
-    printf("FIEL SIZE : %d\n", size);
+		size = size / 2;
+		size = size - 6;
+		
+		printf("FILE SIZE : %d\n", size);
     fseek(output, 0, SEEK_SET);
     int height = size / 100;
 
@@ -117,7 +119,7 @@ void encodeData(const char* inputFile, const char* outputFile)
         return;
     }
 
-    FILE* output = fopen(outputFile, "wb");
+    FILE* output = fopen(outputFile, "ab");
     if (output == NULL)
     {
         printf("Failed to open the output file.\n");
@@ -238,10 +240,6 @@ void encodeData(const char* inputFile, const char* outputFile)
         }
         }
     }
-    for (int i = 0; i < 5; i++) {
-        char ch = '\n';
-        fwrite(&ch, sizeof(char), 1, output);
-    }
     fclose(input);
     fclose(output);
 }
@@ -258,7 +256,43 @@ int main(int argc, char* argv[])
     const char* outputFile = argv[2];
 
     encodeData(inputFile, outputFile);
+    encodeData(inputFile, outputFile);
+		char ch;
+		FILE* output = fopen(outputFile,"ab");
+		if( output == NULL ){
+				printf("outputFILE open error\n");
+				return 0;
+		}
+    for (int i = 1; i < 6; i++) {
+				if(i == 1){
+        		ch = '!';
+       			fwrite(&ch, sizeof(char), 1, output);
+				}
+				if(i == 2){
+        		ch = '@';
+       			fwrite(&ch, sizeof(char), 1, output);
+				}
+				if(i == 3){
+        		ch = '$';
+       			fwrite(&ch, sizeof(char), 1, output);
+				}
+				if(i == 4){
+        		ch = '$';
+       			fwrite(&ch, sizeof(char), 1, output);
+				}
+				if(i == 5){
+        		ch = '%';
+       			fwrite(&ch, sizeof(char), 1, output);
+				}
+				else{
+        		ch = '^';
+       			fwrite(&ch, sizeof(char), 1, output);
+				}
+    }
+		fclose(output);
     printf("Encoded data saved to '%s'.\n", outputFile);
+
+
     encodeASC(outputFile);
     printf("Encoded ASC saved to '%s',\n", outputFile);
     return 0;

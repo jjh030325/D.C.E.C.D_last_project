@@ -22,27 +22,80 @@ void getTable(const char* inputFile) {
 
 	// 2차원 배열 할당 받기 + 마지막 줄 찾기
 	int size = 0;
-	int enter = 0;
+	int symbol = 0;
 	char ch;
 	while (1) {
 		if (fread(&ch, 1, 1, output) != 1) break;
 		size++;
-		if (ch == '\n') {
-			enter++;
+		if (ch == '!') {
+			symbol++;
 			for (int i = 0; i < 5; i++) {
 				fread(&ch, 1, 1, output);
 				size++;
-				if (ch == '\n') enter++;
+				if (ch == '@') symbol++;
+				else if (ch == '#') symbol++;
+				else if (ch == '$') symbol++;
+				else if (ch == '%') symbol++;
+				else if (ch == '^') symbol++;
 			}
+			if (symbol >= 2) {
+				printf("GOOD\n");
+				break;
+			}
+			symbol = 0;
+		}  // 파일 전체 사이즈 + 아스키 코드값 시작
+		else if (ch == '@') {
+			symbol++;
+			for (int i = 0; i < 4; i++) {
+				fread(&ch, 1, 1, output);
+				size++;
+				if (ch == '#') symbol++;
+				else if (ch == '$') symbol++;
+				else if (ch == '%') symbol++;
+				else if (ch == '^') symbol++;
+			}
+			if (symbol >= 2) {
+				printf("GOOD\n");
+				break;
+			}
+			symbol = 0;
+		}  // 파일 전체 사이즈 + 아스키 코드값 시작
+		else if (ch == '#') {
+			symbol++;
+			for (int i = 0; i < 3; i++) {
+				fread(&ch, 1, 1, output);
+				size++;
+				if (ch == '$') symbol++;
+				else if (ch == '%') symbol++;
+				else if (ch == '^') symbol++;
+			}
+			if (symbol >= 2) {
+				printf("GOOD\n");
+				break;
+			}
+			symbol = 0;
 		}
-
-		if (enter > 3) {
-			printf("GOOD\n");
-			size -= 5;
-			break;
+		else if (ch == '$') {
+			symbol++;
+			for (int i = 0; i < 2; i++) {
+				fread(&ch, 1, 1, output);
+				size++;
+				if (ch == '%') symbol++;
+				else if (ch == '^') symbol++;
+			}
+			if (symbol >= 2) {
+				printf("GOOD\n");
+				break;
+			}
+			else {
+				printf("GOOD\n");
+				break;
+			}
+			symbol = 0;
 		}
-		enter = 0;
-	}  // 파일 전체 사이즈 + 아스키 코드값 시작
+	}
+	size = size / 2;
+	size -= 6;
 	printf("현재 파일 위치 : %ld\n", ftell(output));
 	printf("FIEL SIZE : %d\n", size);
 	int height = size / 100;
@@ -56,7 +109,7 @@ void getTable(const char* inputFile) {
 		ASC_column[i] = (int*)calloc(10, sizeof(int));
 		ASC_row[i] = (int*)calloc(10, sizeof(int));
 	}
-	
+
 	// 두 번째 배열 할당
 	compare_ASC_column = (int**)malloc((height + 1) * sizeof(int*));
 	compare_ASC_row = (int**)malloc((height + 1) * sizeof(int*));

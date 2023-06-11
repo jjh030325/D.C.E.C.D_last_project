@@ -10,9 +10,10 @@ int** compare_ASC_row;
 int** compare_ASC_column;
 int compare_ASC_height[10][10] = { 0 };
 
-
+// 아스키 배열들을 추출하기 위한 함수
+// !@#$%^ 순으로 마지막에 적힌 문자열을 고려해서
+// 알고리즘 구현
 void getTable(const char* inputFile) {
-	// 변조 부분을 찾기 위한 아스키 테이터를 추출 하는 함수
 	FILE* output = fopen(inputFile, "rb");
 	if (output == NULL) {
 		fprintf(stderr, "열 수 없습니다.\n");
@@ -21,15 +22,15 @@ void getTable(const char* inputFile) {
 
 
 	// 2차원 배열 할당 받기 + 마지막 줄 찾기
-	int size = 0;
-	int symbol = 0;
+	int size = 0; // 압축된 문자열 길이
+	int symbol = 0; // 특수기호 발견 시 카운트
 	char ch;
-	while (1) {
-		if (fread(&ch, 1, 1, output) != 1) break;
+	while (1) { // 파일 전체를 읽기 위한 루프문
+		if (fread(&ch, 1, 1, output) != 1) break; // 끝까지 가면 탈출
 		size++;
 		if (ch == '!') {
 			symbol++;
-			for (int i = 0; i < 5; i++) {
+			for (int i = 0; i < 5; i++) { // 다음 글자를 읽는다 5글자
 				fread(&ch, 1, 1, output);
 				size++;
 				if (ch == '@') symbol++;

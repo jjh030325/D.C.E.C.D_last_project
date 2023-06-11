@@ -1,10 +1,9 @@
-#define _CRT_SECURE_NO_WARNINGS
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-						
-// 아스키 데이터를 추출하는 함수
-void encodeASC(const char* outputFile) {
+
+void encodeASC(const char* outputFile)
+{
     FILE* output = fopen(outputFile, "rb");
     if (output == NULL)
     {
@@ -13,78 +12,96 @@ void encodeASC(const char* outputFile) {
     }
     int size = 0;
     char ch;
-		// 아스키 데이터를 위한 2차원 배열을 동적 할당 한다
     while (fread(&ch, 1, 1, output) == 1) size++; // 파일 전체 사이즈
+    size = size / 2;
+    size = size - 6;
+
+    printf("FILE SIZE : %d\n", size);
+    fseek(output, 0, SEEK_SET);
     int height = size / 100;
 
-    int **ASC_column = (int**)malloc((height + 1) * sizeof(int*));
+    size -= 100 * height; // 백자리 제외
+    int** ASC_column = (int**)malloc((height + 1) * sizeof(int*));
+    int** ASC_row = (int**)malloc((height + 1) * sizeof(int*));
+    int ASC_height[10][10] = { 0 };
     for (int i = 0; i < height + 1; i++) {
         ASC_column[i] = (int*)calloc(10, sizeof(int));
-    }
-
-    int **ASC_row = (int**)malloc((height + 1) * sizeof(int*));
-    for (int i = 0; i < height + 1; i++) {
         ASC_row[i] = (int*)calloc(10, sizeof(int));
     }
+    printf("동적 할당 완료\n");
 
-    int **ASC_height = (int**)malloc((height + 1) * sizeof(int*));
-    for (int i = 0; i < height + 1; i++) {
-        ASC_height[i] = (int*)calloc(10, sizeof(int));
-    }
-
-		// 실질적인 데이터 추출
     for (int k = 0; k < height; k++) { // 최대 높이 만큼 반복
         for (int i = 0; i < 10; i++) { // 세로
             for (int j = 0; j < 10; j++) { // 가로
-                fread(&ch, 1, 1, output);
-                ASC_column[k][j] += ch;
-                ASC_row[k][i] += ch;
-                ASC_height[i][j] += ch; 
+                if (fread(&ch, 1, 1, output) != 1) {
+                    printf("Failed to read from output file.\n");
+                    fclose(output);
+                    return;
+                }
+                printf("%d%d%d 번째 아스키 코드값 : %d\n", k, i, j, ch);
+                ASC_column[k][j] += ch; // 높이 고정, 가로 j가 증가하면서 해당 행에 대한 값을 더한다
+                printf("ASC_column[%d][%d] : %d\n", k, j, ASC_column[k][j]);
+                ASC_row[k][i] += ch; // 높이 고정, 세로 i가 증가하면서 해당 열에 대한 값을 더한다
+                printf("ASC_row[%d][%d] : %d\n", k, i, ASC_row[k][i]);
+                ASC_height[i][j] += ch;  // 
+                printf("ASC_height[%d][%d] : %d\n\n", i, j, ASC_height[i][j]);
             }
         }
     }
+    printf("100단위 값 저장 완료\n");
 
-		// 남은 바이트 추출
-    size -= 100 * height;
-    for (int i = 0; i < size / 10; i++) {
-        for (int j = 0; j < 10; j++) {
-            fread(&ch, 1, 1, output);
-            ASC_column[height][j] += ch;
-            ASC_row[height][i] += ch;
-            ASC_height[i][j] += ch;
-        }
-        if ( i + 1 == size / 10 ) {
-            size %= 10;
-            for(int j = 0; j < size; j++){
-                fread(&ch, 1, 1, output);
-                ASC_column[height][j] += ch;
-                ASC_row[height][i] += ch;
-                ASC_height[i][j] += ch;
+
+    for (int i = 0; i < size / 10 + 1; i++) { // 나머지 길이만큼 반복
+        for (int j = 0; j < size % 10; j++) {
+            if (fread(&ch, 1, 1, output) != 1) {
+                printf(" Read to file end\n");
+                break;
             }
+            printf("%d%d%d 번째 아스키 코드값 : %d\n", height, i, j, ch);
+            ASC_column[height][j] += ch; // 높이 고정, 가로 j가 증가하면서 해당 행에 대한 값을 더한다
+            printf("ASC_column[%d][%d] : %d\n", height, j, ASC_column[height][j]);
+            ASC_row[height][i] += ch; // 높이 고정, 세로 i가 증가하면서 해당 열에 대한 값을 더한다
+            printf("ASC_row[%d][%d] : %d\n", height, i, ASC_row[height][i]);
+            ASC_height[height][j] += ch;
+            printf("ASC_height[%d][%d] : %d\n\n", height, j, ASC_height[height][j]);
         }
     }
-		fclose(output);
-    output = NULL;
+    fclose(output);
 
-		// 추출한 데이터를 파일에 쓴다
-		// todo: 구분기호 추가
-    FILE* input = fopen(outputFile, "ab");
-    fwrite(ASC_column, sizeof(ASC_column), 1, input);
-    fwrite(ASC_row, sizeof(ASC_row), 1, input);
-    fwrite(ASC_height, sizeof(ASC_height), 1, input);
-    fclose(input);
-    input = NULL;
+    // 인코딩된 값을 파일에 쓰기
+    FILE* encodedOutput = fopen(outputFile, "ab");
+    if (encodedOutput == NULL) {
+        printf("Failed to open encoded output file.\n");
+        fclose(output);
+        return;
+    }
+    printf("덧붙여 쓰기 시작 위치 : %ld\n", ftell(encodedOutput));
+    for (int k = 0; k < height + 1; k++) {
+        fwrite(ASC_column[k], sizeof(int), 10, encodedOutput);
+        fwrite(ASC_row[k], sizeof(int), 10, encodedOutput);
+    }
+    for (int k = 0; k < 10; k++) {
+        fwrite(ASC_height[k], sizeof(int), 10, encodedOutput);
+    }
 
-		// 동적할당한 배열 삭제
-    for (int i = 0; i < height + 1; i++) free(ASC_column[i]);
+    for (int k = 0; k < height + 1; k++) {
+        fwrite(ASC_column[k], sizeof(int), 10, encodedOutput);
+        fwrite(ASC_row[k], sizeof(int), 10, encodedOutput);
+    }
+    for (int k = 0; k < 10; k++) {
+        fwrite(ASC_height[k], sizeof(int), 10, encodedOutput);
+    }
+    fclose(encodedOutput);
+    // 동적 할당된 메모리 해제
+    for (int i = 0; i < height + 1; i++) {
+        free(ASC_column[i]);
+        free(ASC_row[i]);
+    }
     free(ASC_column);
-    for (int i = 0; i < height + 1; i++) free(ASC_row[i]);
     free(ASC_row);
-    for (int i = 0; i < height + 1; i++) free(ASC_height[i]);
-    free(ASC_height);
 }
 
-// s에서 문자열toRemove를 삭제하는 함수
+// 문자열 s에서 toRmove를 삭제한다(필요없는 데이터를 삭제하는 작업)
 void removeSubstring(char* s, const char* toRemove)
 {
     char* match = strstr(s, toRemove);
@@ -94,7 +111,6 @@ void removeSubstring(char* s, const char* toRemove)
     }
 }
 
-// 데이터를 압축하는 함수
 void encodeData(const char* inputFile, const char* outputFile)
 {
     FILE* input = fopen(inputFile, "r");
@@ -104,7 +120,7 @@ void encodeData(const char* inputFile, const char* outputFile)
         return;
     }
 
-    FILE* output = fopen(outputFile, "wb");
+    FILE* output = fopen(outputFile, "ab");
     if (output == NULL)
     {
         printf("Failed to open the output file.\n");
@@ -135,6 +151,7 @@ void encodeData(const char* inputFile, const char* outputFile)
             else if (strcmp(line, "*DESCRIPTION*\n") == 0)
             {
                 section = 3;
+                fwrite("/", sizeof(char), 1, output);
             }
 
             continue;
@@ -209,9 +226,11 @@ void encodeData(const char* inputFile, const char* outputFile)
                     removeSubstring(position, "NAME: ");
                     removeSubstring(position, "GENDER: ");
                     removeSubstring(position, "AGE: ");
+
+                    // Replace the first space with "&"
+                    *position = '&';
                 }
             }
-
             fwrite(line, sizeof(char), strlen(line), output);
             break;
         }
@@ -222,7 +241,6 @@ void encodeData(const char* inputFile, const char* outputFile)
         }
         }
     }
-
     fclose(input);
     fclose(output);
 }
@@ -238,11 +256,48 @@ int main(int argc, char* argv[])
     const char* inputFile = argv[1];
     const char* outputFile = argv[2];
 
+    // 파일 압축 함수(2번 쓴다)
     encodeData(inputFile, outputFile);
+    encodeData(inputFile, outputFile);
+
+    // 구분기호 입력
+    char ch;
+    FILE* output = fopen(outputFile, "ab");
+    if (output == NULL) {
+        printf("outputFILE open error\n");
+        return 0;
+    }
+    for (int i = 0; i < 6; i++) {
+        if (i == 0) {
+            ch = '!';
+            fwrite(&ch, sizeof(char), 1, output);
+        }
+        if (i == 1) {
+            ch = '@';
+            fwrite(&ch, sizeof(char), 1, output);
+        }
+        if (i == 2) {
+            ch = '#';
+            fwrite(&ch, sizeof(char), 1, output);
+        }
+        if (i == 3) {
+            ch = '$';
+            fwrite(&ch, sizeof(char), 1, output);
+        }
+        if (i == 4) {
+            ch = '%';
+            fwrite(&ch, sizeof(char), 1, output);
+        }
+        else {
+            ch = '^';
+            fwrite(&ch, sizeof(char), 1, output);
+        }
+    }
+    fclose(output);
     printf("Encoded data saved to '%s'.\n", outputFile);
+
+    // 아스키 데이터 입력
     encodeASC(outputFile);
     printf("Encoded ASC saved to '%s',\n", outputFile);
     return 0;
 }
-
->>>>>>> seungmin

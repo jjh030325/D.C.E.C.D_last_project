@@ -22,27 +22,84 @@ void getTable(const char* inputFile) {
 
 	// 2차원 배열 할당 받기 + 마지막 줄 찾기
 	int size = 0;
-	int enter = 0;
+	int symbol = 0;
 	char ch;
 	while (1) {
 		if (fread(&ch, 1, 1, output) != 1) break;
 		size++;
-		if (ch == '\n') {
+		if (ch == '!') {
 			enter++;
 			for (int i = 0; i < 5; i++) {
 				fread(&ch, 1, 1, output);
 				size++;
-				if (ch == '\n') enter++;
+				if (ch == '@') symbol++;
+				else if (ch == '#') symbol++;
+				else if (ch == '$') symbol++;
+				else if (ch == '%') symbol++;
+				else if(ch == '^') symbol++;
 			}
+			if (symbol >= 2) {
+					printf("GOOD\n");
+					size -= 6;
+					break;
+			}
+			symbol = 0;
+		}  // 파일 전체 사이즈 + 아스키 코드값 시작
+		if (ch == '@') {
+			enter++;
+			for (int i = 0; i < 4; i++) {
+				fread(&ch, 1, 1, output);
+				size++;
+				if (ch == '#') symbol++;
+				else if (ch == '$') symbol++;
+				else if (ch == '%') symbol++;
+				else if (ch == '^') symbol++;
+			}
+			if (symbol >= 2) {
+					printf("GOOD\n");
+					size -= 6;
+					break;
+			}
+			symbol = 0;
+		}  // 파일 전체 사이즈 + 아스키 코드값 시작
+		else if (ch == '#') {
+			enter++;
+			for (int i = 0; i < 3; i++) {
+				fread(&ch, 1, 1, output);
+				size++;
+				if (ch == '$') symbol++;
+				else if (ch == '%') symbol++;
+				else if (ch == '^') symbol++;
+			}
+			if (symbol >= 2) {
+					printf("GOOD\n");
+					size -= 6;
+					break;
+			}
+			symbol = 0;
 		}
+		else if (ch == '$') {
+			enter++;
+			for (int i = 0; i < 2; i++) {
+				fread(&ch, 1, 1, output);
+				size++;
+				if (ch == '%') symbol++;
+				else if (ch == '^') symbol++;
+			}
+			if (symbol >= 2) {
+					printf("GOOD\n");
+					size -= 6;
+					break;
+			else{
+					printf("GOOD\n");
+					size -= 6;
+					break;
+			}
+			}
+			symbol = 0;
+		}
+	}
 
-		if (enter > 3) {
-			printf("GOOD\n");
-			size -= 5;
-			break;
-		}
-		enter = 0;
-	}  // 파일 전체 사이즈 + 아스키 코드값 시작
 	printf("현재 파일 위치 : %ld\n", ftell(output));
 	printf("FIEL SIZE : %d\n", size);
 	int height = size / 100;

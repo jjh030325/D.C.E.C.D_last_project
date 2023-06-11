@@ -263,13 +263,17 @@ int main(int argc, char* argv[])
 				printf("outputFILE open error\n");
 				return 0;
 		}
-    for (int i = 1; i < 6; i++) {
-				if(i == 1){
+    for (int i = 0; i < 6; i++) {
+				if(i == 0){
         		ch = '!';
        			fwrite(&ch, sizeof(char), 1, output);
 				}
-				if(i == 2){
+				if(i == 1){
         		ch = '@';
+       			fwrite(&ch, sizeof(char), 1, output);
+				}
+				if(i == 2){
+        		ch = '#';
        			fwrite(&ch, sizeof(char), 1, output);
 				}
 				if(i == 3){
@@ -277,10 +281,6 @@ int main(int argc, char* argv[])
        			fwrite(&ch, sizeof(char), 1, output);
 				}
 				if(i == 4){
-        		ch = '$';
-       			fwrite(&ch, sizeof(char), 1, output);
-				}
-				if(i == 5){
         		ch = '%';
        			fwrite(&ch, sizeof(char), 1, output);
 				}

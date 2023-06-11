@@ -39,7 +39,8 @@ void getTable(const char* inputFile) {
 				else if (ch == '^') symbol++;
 			}
 			if (symbol >= 2) {
-				printf("GOOD\n");
+				printf("! 조건문 GOOD\n");
+				printf("symbol : %d\n", symbol);
 				break;
 			}
 			symbol = 0;
@@ -87,15 +88,12 @@ void getTable(const char* inputFile) {
 				printf("GOOD\n");
 				break;
 			}
-			else {
-				printf("GOOD\n");
-				break;
-			}
 			symbol = 0;
 		}
 	}
-	size = size / 2;
 	size -= 6;
+	size = size / 2;
+	fseek(output, 4, SEEK_CUR);
 	printf("현재 파일 위치 : %ld\n", ftell(output));
 	printf("FIEL SIZE : %d\n", size);
 	int height = size / 100;

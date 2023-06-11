@@ -28,7 +28,7 @@ void getTable(const char* inputFile) {
 		if (fread(&ch, 1, 1, output) != 1) break;
 		size++;
 		if (ch == '!') {
-			enter++;
+			symbol++;
 			for (int i = 0; i < 5; i++) {
 				fread(&ch, 1, 1, output);
 				size++;
@@ -36,17 +36,16 @@ void getTable(const char* inputFile) {
 				else if (ch == '#') symbol++;
 				else if (ch == '$') symbol++;
 				else if (ch == '%') symbol++;
-				else if(ch == '^') symbol++;
+				else if (ch == '^') symbol++;
 			}
 			if (symbol >= 2) {
-					printf("GOOD\n");
-					size -= 6;
-					break;
+				printf("GOOD\n");
+				break;
 			}
 			symbol = 0;
 		}  // 파일 전체 사이즈 + 아스키 코드값 시작
-		if (ch == '@') {
-			enter++;
+		else if (ch == '@') {
+			symbol++;
 			for (int i = 0; i < 4; i++) {
 				fread(&ch, 1, 1, output);
 				size++;
@@ -56,14 +55,13 @@ void getTable(const char* inputFile) {
 				else if (ch == '^') symbol++;
 			}
 			if (symbol >= 2) {
-					printf("GOOD\n");
-					size -= 6;
-					break;
+				printf("GOOD\n");
+				break;
 			}
 			symbol = 0;
 		}  // 파일 전체 사이즈 + 아스키 코드값 시작
 		else if (ch == '#') {
-			enter++;
+			symbol++;
 			for (int i = 0; i < 3; i++) {
 				fread(&ch, 1, 1, output);
 				size++;
@@ -72,14 +70,13 @@ void getTable(const char* inputFile) {
 				else if (ch == '^') symbol++;
 			}
 			if (symbol >= 2) {
-					printf("GOOD\n");
-					size -= 6;
-					break;
+				printf("GOOD\n");
+				break;
 			}
 			symbol = 0;
 		}
 		else if (ch == '$') {
-			enter++;
+			symbol++;
 			for (int i = 0; i < 2; i++) {
 				fread(&ch, 1, 1, output);
 				size++;
@@ -87,19 +84,18 @@ void getTable(const char* inputFile) {
 				else if (ch == '^') symbol++;
 			}
 			if (symbol >= 2) {
-					printf("GOOD\n");
-					size -= 6;
-					break;
-			else{
-					printf("GOOD\n");
-					size -= 6;
-					break;
+				printf("GOOD\n");
+				break;
 			}
+			else {
+				printf("GOOD\n");
+				break;
 			}
 			symbol = 0;
 		}
 	}
-
+	size = size / 2;
+	size -= 6;
 	printf("현재 파일 위치 : %ld\n", ftell(output));
 	printf("FIEL SIZE : %d\n", size);
 	int height = size / 100;
@@ -113,7 +109,7 @@ void getTable(const char* inputFile) {
 		ASC_column[i] = (int*)calloc(10, sizeof(int));
 		ASC_row[i] = (int*)calloc(10, sizeof(int));
 	}
-	
+
 	// 두 번째 배열 할당
 	compare_ASC_column = (int**)malloc((height + 1) * sizeof(int*));
 	compare_ASC_row = (int**)malloc((height + 1) * sizeof(int*));

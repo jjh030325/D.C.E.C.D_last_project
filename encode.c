@@ -14,7 +14,7 @@ void encodeASC(const char* outputFile)
     char ch;
     while (fread(&ch, 1, 1, output) == 1) size++; // 파일 전체 사이즈
 		size = size / 2;
-		size = size - 5;
+		size = size - 6;
 		
 		printf("FILE SIZE : %d\n", size);
     fseek(output, 0, SEEK_SET);

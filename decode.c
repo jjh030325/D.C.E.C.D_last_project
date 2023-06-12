@@ -15,6 +15,11 @@ char* compare_compress_str;
 
 int size = 0;
 int height = 0;
+
+// (V_ASC_count, V_Char_count) = (4, 0), (3, 1), (2, 2), (1, 3), (0, 4)
+// (4, 0) 인 경우 -> 바로 해독 실행 (3, 1), (2, 2), (1, 3), (0, 4)
+// 가로 세로 높이 중 변조가 일어난 부분을 제외한 축을 이용해 변조 복구를 한다
+// 한 개의 축을 이용해서 변조 복구가 가능하다
 int V_ASC_count;
 int V_Char_count;
 
@@ -273,8 +278,9 @@ void checkData() {
 	}
 }
 
+//압축된 문자 복원 함수
 void dataRestore() {
-	// 바이너리 파일 복원 함수
+	if()
 }
 
 //파일 복원 함수

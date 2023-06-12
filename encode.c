@@ -2,6 +2,8 @@
 #include <stdlib.h>
 #include <string.h>
 
+
+// 아스키 데이터를 만들고 파일에 쓰는 함수
 void encodeASC(const char* outputFile)
 {
     FILE* output = fopen(outputFile, "rb");
@@ -101,7 +103,7 @@ void encodeASC(const char* outputFile)
     free(ASC_row);
 }
 
-// 문자열 s에서 toRmove를 삭제한다(필요없는 데이터를 삭제하는 작업)
+// 문자열 s에서 toRemove를 제거하는 함수
 void removeSubstring(char* s, const char* toRemove)
 {
     char* match = strstr(s, toRemove);
@@ -111,6 +113,7 @@ void removeSubstring(char* s, const char* toRemove)
     }
 }
 
+// 데이터를 압축하고 파일에 쓰는 함수
 void encodeData(const char* inputFile, const char* outputFile)
 {
     FILE* input = fopen(inputFile, "r");
@@ -256,11 +259,8 @@ int main(int argc, char* argv[])
     const char* inputFile = argv[1];
     const char* outputFile = argv[2];
 
-    // 파일 압축 함수(2번 쓴다)
     encodeData(inputFile, outputFile);
     encodeData(inputFile, outputFile);
-
-    // 구분기호 입력
     char ch;
     FILE* output = fopen(outputFile, "ab");
     if (output == NULL) {
@@ -296,7 +296,7 @@ int main(int argc, char* argv[])
     fclose(output);
     printf("Encoded data saved to '%s'.\n", outputFile);
 
-    // 아스키 데이터 입력
+
     encodeASC(outputFile);
     printf("Encoded ASC saved to '%s',\n", outputFile);
     return 0;

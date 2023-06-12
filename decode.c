@@ -10,6 +10,37 @@ int** compare_ASC_row;
 int** compare_ASC_column;
 int compare_ASC_height[10][10] = { 0 };
 
+char* compress_str;
+char* compare_compress_str;
+
+int size = 0;
+int height = 0;
+
+// (V_ASC_count, V_Char_count) = (4, 0), (3, 1), (2, 2), (1, 3), (0, 4)
+// (4, 0) 인 경우 -> 바로 해독 실행 (3, 1), (2, 2), (1, 3), (0, 4)
+// 가로 세로 높이 중 변조가 일어난 부분을 제외한 축을 이용해 변조 복구를 한다
+// 한 개의 축을 이용해서 변조 복구가 가능하다
+int V_ASC_count;
+int V_Char_count;
+
+
+// 인덱스 0부터 시작 되는 값을 그대로 받는다 배열에 그대로 가져다 쓰면 됨,
+typedef struct {
+	int row;
+	int column;
+	int height;
+	char ch;
+}Char_variable; // 변조된 압축문자에 대한 정보
+
+typedef struct {
+	int xpos;
+	int ypos;
+	char type; // r = ASC_row, c = ASC_column, h = ASC_height
+}ASC_variable; // 변조된 아스키데이터에 대한 정보
+
+Char_variable* Cvar;
+ASC_variable* Avar;
+
 // 아스키 배열들을 추출하기 위한 함수
 // !@#$%^ 순으로 마지막에 적힌 문자열을 고려해서
 // 알고리즘 구현
@@ -22,7 +53,6 @@ void getTable(const char* inputFile) {
 
 
 	// 2차원 배열 할당 받기 + 마지막 줄 찾기
-	int size = 0; // 압축된 문자열 길이
 	int symbol = 0; // 특수기호 발견 시 카운트
 	char ch;
 	while (1) { // 파일 전체를 읽기 위한 루프문
@@ -33,11 +63,11 @@ void getTable(const char* inputFile) {
 			for (int i = 0; i < 5; i++) { // 다음 글자를 읽는다 5글자
 				fread(&ch, 1, 1, output);
 				size++;
-				if (ch == '@') symbol++;
-				else if (ch == '#') symbol++;
-				else if (ch == '$') symbol++;
-				else if (ch == '%') symbol++;
-				else if (ch == '^') symbol++;
+				if (ch == '@' && i==0) symbol++;
+				else if (ch == '#' && i==1) symbol++;
+				else if (ch == '$' && i==2) symbol++;
+				else if (ch == '%' && i==3) symbol++;
+				else if (ch == '^' && i==4) symbol++;
 			}
 			if (symbol >= 2) {
 				printf("! 조건문 GOOD\n");
@@ -51,10 +81,10 @@ void getTable(const char* inputFile) {
 			for (int i = 0; i < 4; i++) {
 				fread(&ch, 1, 1, output);
 				size++;
-				if (ch == '#') symbol++;
-				else if (ch == '$') symbol++;
-				else if (ch == '%') symbol++;
-				else if (ch == '^') symbol++;
+				if (ch == '#' && i==0) symbol++;
+				else if (ch == '$' && i==1) symbol++;
+				else if (ch == '%' && i==2) symbol++;
+				else if (ch == '^' && i==3) symbol++;
 			}
 			if (symbol >= 2) {
 				printf("GOOD\n");
@@ -67,9 +97,9 @@ void getTable(const char* inputFile) {
 			for (int i = 0; i < 3; i++) {
 				fread(&ch, 1, 1, output);
 				size++;
-				if (ch == '$') symbol++;
-				else if (ch == '%') symbol++;
-				else if (ch == '^') symbol++;
+				if (ch == '$' && i==0) symbol++;
+				else if (ch == '%' && i==1) symbol++;
+				else if (ch == '^' && i==2) symbol++;
 			}
 			if (symbol >= 2) {
 				printf("GOOD\n");
@@ -82,8 +112,8 @@ void getTable(const char* inputFile) {
 			for (int i = 0; i < 2; i++) {
 				fread(&ch, 1, 1, output);
 				size++;
-				if (ch == '%') symbol++;
-				else if (ch == '^') symbol++;
+				if (ch == '%' && i==0) symbol++;
+				else if (ch == '^' && i==1) symbol++;
 			}
 			if (symbol >= 2) {
 				printf("GOOD\n");
@@ -94,10 +124,12 @@ void getTable(const char* inputFile) {
 	}
 	size -= 6;
 	size = size / 2;
+	size -= 1;
+
 	fseek(output, 4, SEEK_CUR);
 	printf("현재 파일 위치 : %ld\n", ftell(output));
 	printf("FIEL SIZE : %d\n", size);
-	int height = size / 100;
+	height = size / 100; // 0층부터 시작
 	size -= 100 * height; // 백자리 제외
 
 
@@ -136,10 +168,20 @@ void getTable(const char* inputFile) {
 		fread(compare_ASC_height[k], sizeof(int), 10, output);
 	}
 
+	size += 100 * height;
+	// 압축된 문자열 배열 할당 + 값삽입
+	fseek(output, 0, SEEK_SET);
+	compress_str = (char*)calloc(size, sizeof(int));
+	compare_compress_str = (char*)calloc(size, sizeof(int));
 
-
-
+	fread(compress_str, 1, size, output);
+	fseek(output, 1, SEEK_CUR);
+	fread(compare_compress_str, 1, size, output);
+	compress_str[size] = '\n';
+	compare_compress_str[size] = '\n';
 	// 값 확인
+	
+	
 	for (int i = 0; i < height + 1; i++) {
 		for (int j = 0; j < 10; j++) {
 			printf("ASC_column[%d][%d] : %d\n", i, j, ASC_column[i][j]);
@@ -152,30 +194,93 @@ void getTable(const char* inputFile) {
 		}
 		printf("\n");
 	}
-
-
-	// 할당 해제
-	for (int i = 0; i < height + 1; i++) {
-		free(ASC_column[i]);
-		free(ASC_row[i]);
-	}
-	free(ASC_column);
-	free(ASC_row);
-
-	for (int i = 0; i < height + 1; i++) {
-		free(compare_ASC_column[i]);
-		free(compare_ASC_row[i]);
-	}
-	free(compare_ASC_column);
-	free(compare_ASC_row);
+	
+	
+	printf("compress_str : %s\n", compress_str);
+	printf("compare_compress_str : %s\n", compare_compress_str);
+	//printf("getTable 성공\n");
 	fclose(output);
+	output = NULL;
 }
 void checkData() {
-	// 변조 체크를 하는 함수
+	// 압축된 문자열에서 변조 확인 확인 
+	Cvar = (Char_variable*)malloc(sizeof(Char_variable));
+	Avar = (ASC_variable*)malloc(sizeof(ASC_variable));
+	V_ASC_count = 0;
+	V_Char_count = 0;
+
+	for (int i = 0; i < size; i++) {
+		if (compare_compress_str[i] != compress_str[i]) {
+			if(V_Char_count != 0) Cvar = (Char_variable*)realloc(Cvar, sizeof(Char_variable) * (V_Char_count+1));
+			(Cvar + V_Char_count)->ch = compress_str[i];
+			(Cvar + V_Char_count)->height = i / 100;
+			for (int j = 0; j < height + 1; j++) {
+				if (i / 100 == j) {
+					int num = i;
+					num = num - 100 * j;
+					(Cvar + V_Char_count)->row = num / 10;
+					(Cvar + V_Char_count)->column = num % 10;
+				}
+			}
+			V_Char_count++;
+		}
+	}
+
+
+	//아스키 데이터에서 변조 확인
+	for (int i = 0; i < height + 1; i++) {
+		for (int j = 0; j < 10; j++) {
+			if (compare_ASC_column[i][j] != ASC_column[i][j]) {
+				if (V_ASC_count != 0) Avar = (ASC_variable*)realloc(Avar, sizeof(ASC_variable) * (V_ASC_count + 1));
+				(Avar + V_ASC_count)->type = 'c';
+				(Avar + V_ASC_count)->xpos = j;
+				(Avar + V_ASC_count)->ypos = i;
+				V_ASC_count++;
+			}
+
+			if (compare_ASC_row[i][j] != ASC_row[i][j]) {
+				if (V_ASC_count != 0) Avar = (ASC_variable*)realloc(Avar, sizeof(ASC_variable) * (V_ASC_count + 1));
+				(Avar + V_ASC_count)->type = 'r';
+				(Avar + V_ASC_count)->xpos = j;
+				(Avar + V_ASC_count)->ypos = i;
+				V_ASC_count++;
+			}
+		}
+	}
+
+	for (int i = 0; i < 10; i++) {
+		for (int j = 0; j < 10; j++) {
+			if (compare_ASC_height[i][j] != ASC_height[i][j]) {
+				if (V_Char_count != 0) Avar = (ASC_variable*)realloc(Avar, sizeof(ASC_variable) * (V_ASC_count + 1));
+				(Avar + V_ASC_count)->type = 'h';
+				(Avar + V_ASC_count)->xpos = j;
+				(Avar + V_ASC_count)->ypos = i;
+				V_ASC_count++;
+			}
+		}
+	}
+
+
+
+	for (int i = 0; i < V_Char_count; i++) {
+		printf("--------------------------\n");
+		printf("ch -> %c\n", Cvar[i].ch);
+		printf("row -> %d\n", Cvar[i].row);
+		printf("column - > %d\n", Cvar[i].column);
+		printf("height - > %d\n", Cvar[i].height);
+	}
+
+	for (int i = 0; i < V_ASC_count; i++) {
+		printf("--------------------------\n");
+		printf("type -> %c\n", Avar[i].type);
+		printf("xpos -> %d\n", Avar[i].xpos);
+		printf("ypos - > %d\n", Avar[i].ypos);
+	}
 }
 
+//압축된 문자 복원 함수
 void dataRestore() {
-	// 바이너리 파일 복원 함수
+	if()
 }
 
 //파일 복원 함수
@@ -355,7 +460,30 @@ int main(int argc, char* argv[]) {
 
 	const char* inputFile = argv[1];
 	const char* outputFile = argv[2];
-	//restore(inputFile, outputFile);
+	restore(inputFile, outputFile);
 	getTable(inputFile);
+	checkData();
+
+	// 할당 해제
+	for (int i = 0; i < height + 1; i++) {
+		free(ASC_column[i]);
+		free(ASC_row[i]);
+	}
+	free(ASC_column);
+	free(ASC_row);
+
+	for (int i = 0; i < height + 1; i++) {
+		free(compare_ASC_column[i]);
+		free(compare_ASC_row[i]);
+	}
+	free(compare_ASC_column);
+	free(compare_ASC_row);
+
+	free(compress_str);
+	free(compare_compress_str);
+
+	free(Cvar);
+	free(Avar);
+
 	return 0;
 }

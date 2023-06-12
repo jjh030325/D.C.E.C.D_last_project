@@ -492,7 +492,8 @@ void fileRestore(const char* inputFile, const char* outputFile) {
 
 	// 바이너리 파일에서 데이터 읽어와 텍스트 파일에 쓰기
 	int ch;
-	while ((ch = fgetc(binaryFile)) != EOF) {
+	for (int i = 0; i < size; i++ ) {
+		ch = compress_str[i];
 		// '\n' 문자일 경우
 		if (ch == '\n') {
 			newlineCount++;
@@ -686,9 +687,7 @@ void dataRestore(const char* inputFile, const char* outputFile) {
 	}
 
 	// 복구된 문자열 파일에 덮어쓰기
-	FILE* input = fopen(inputFile, "wb");
-	fwrite(compress_str, size, 1, input);
-	fclose(input);
+
 }
 
 

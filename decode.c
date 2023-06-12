@@ -16,10 +16,7 @@ char* compare_compress_str;
 int size = 0;
 int height = 0;
 
-// (V_ASC_count, V_Char_count) = (4, 0), (3, 1), (2, 2), (1, 3), (0, 4)
-// (4, 0) 인 경우 -> 바로 해독 실행 (3, 1), (2, 2), (1, 3), (0, 4)
-// 가로 세로 높이 중 변조가 일어난 부분을 제외한 축을 이용해 변조 복구를 한다
-// 한 개의 축을 이용해서 변조 복구가 가능하다
+
 int V_ASC_count;
 int V_Char_count;
 
@@ -63,11 +60,11 @@ void getTable(const char* inputFile) {
 			for (int i = 0; i < 5; i++) { // 다음 글자를 읽는다 5글자
 				fread(&ch, 1, 1, output);
 				size++;
-				if (ch == '@') symbol++;
-				else if (ch == '#') symbol++;
-				else if (ch == '$') symbol++;
-				else if (ch == '%') symbol++;
-				else if (ch == '^') symbol++;
+				if (ch == '@' && i == 0) symbol++;
+				else if (ch == '#' && i == 1) symbol++;
+				else if (ch == '$' && i == 2) symbol++;
+				else if (ch == '%' && i == 3) symbol++;
+				else if (ch == '^' && i == 4) symbol++;
 			}
 			if (symbol >= 2) {
 				printf("! 조건문 GOOD\n");
@@ -81,10 +78,10 @@ void getTable(const char* inputFile) {
 			for (int i = 0; i < 4; i++) {
 				fread(&ch, 1, 1, output);
 				size++;
-				if (ch == '#') symbol++;
-				else if (ch == '$') symbol++;
-				else if (ch == '%') symbol++;
-				else if (ch == '^') symbol++;
+				if (ch == '#' && i == 0) symbol++;
+				else if (ch == '$' && i == 1) symbol++;
+				else if (ch == '%' && i == 2) symbol++;
+				else if (ch == '^' && i == 3) symbol++;
 			}
 			if (symbol >= 2) {
 				printf("GOOD\n");
@@ -97,9 +94,9 @@ void getTable(const char* inputFile) {
 			for (int i = 0; i < 3; i++) {
 				fread(&ch, 1, 1, output);
 				size++;
-				if (ch == '$') symbol++;
-				else if (ch == '%') symbol++;
-				else if (ch == '^') symbol++;
+				if (ch == '$' && i == 0) symbol++;
+				else if (ch == '%' && i == 1) symbol++;
+				else if (ch == '^' && i == 2) symbol++;
 			}
 			if (symbol >= 2) {
 				printf("GOOD\n");
@@ -112,8 +109,8 @@ void getTable(const char* inputFile) {
 			for (int i = 0; i < 2; i++) {
 				fread(&ch, 1, 1, output);
 				size++;
-				if (ch == '%') symbol++;
-				else if (ch == '^') symbol++;
+				if (ch == '%' && i == 0) symbol++;
+				else if (ch == '^' && i == 1) symbol++;
 			}
 			if (symbol >= 2) {
 				printf("GOOD\n");
@@ -180,8 +177,8 @@ void getTable(const char* inputFile) {
 	compress_str[size] = '\n';
 	compare_compress_str[size] = '\n';
 	// 값 확인
-	
-	
+
+
 	for (int i = 0; i < height + 1; i++) {
 		for (int j = 0; j < 10; j++) {
 			printf("ASC_column[%d][%d] : %d\n", i, j, ASC_column[i][j]);
@@ -194,14 +191,16 @@ void getTable(const char* inputFile) {
 		}
 		printf("\n");
 	}
-	
-	
+
+
 	printf("compress_str : %s\n", compress_str);
 	printf("compare_compress_str : %s\n", compare_compress_str);
 	//printf("getTable 성공\n");
 	fclose(output);
 	output = NULL;
 }
+
+
 void checkData() {
 	// 압축된 문자열에서 변조 확인 확인 
 	Cvar = (Char_variable*)malloc(sizeof(Char_variable));
@@ -278,10 +277,110 @@ void checkData() {
 	}
 }
 
-//압축된 문자 복원 함수
-void dataRestore() {
-	if()
+//  Avar -> type, xpos, ypos       Cvar -> ch, row, column, height
+// (V_ASC_count, V_Char_count) = (4, 0), (3, 1), (2, 2), (1, 3), (0, 4)
+// (4, 0) 인 경우 -> 바로 해독 실행 (3, 1), (2, 2), (1, 3), (0, 4)
+// 가로 세로 높이 중 변조가 일어난 부분을 제외한 축을 이용해 변조 복구를 한다
+// 한 개의 축을 이용해서 변조 복구가 가능하다
+// 압축된 문자 복원 함수
+void dataRestore(const char* inputFile, const char* outputFile) {
+	if (V_ASC_count == 4) restore(inputFile, outputFile);
+	else if (V_ASC_count == 3 && V_Char_count == 1) {
+		//Avar[0]; Avar[1]; Avar[2]; Cvar[0];
+		char restore_ch0 = charRestore(0, 3);
+
+
+		compress_str[Cvar[0].height * 100 + Cvar[0].row * 10 + Cvar[0].column] = restore_ch0; // 복구
+	}
+	else if (V_ASC_count == 2 && V_Char_count == 2) {
+		//Avar[0]; Avar[1]; Cvar[0]; Cvar[1];
+		char restore_ch0 = charRestore(0, 2);
+		char restore_ch1 = charRestore(1, 2);
+
+
+		compress_str[Cvar[0].height * 100 + Cvar[0].row * 10 + Cvar[0].column] = restore_ch0;
+		compress_str[Cvar[1].height * 100 + Cvar[1].row * 10 + Cvar[1].column] = restore_ch1;
+	}
+	else if (V_ASC_count == 1 && V_Char_count == 3) {
+		//Avar[0]; Cvar[0]; Cvar[1]; Cvar[2];
+		char restore_ch0 = charRestore(0, 1);
+		char restore_ch1 = charRestore(1, 1);
+		char restore_ch2 = charRestore(2, 1);
+
+
+		compress_str[Cvar[0].height * 100 + Cvar[0].row * 10 + Cvar[0].column] = restore_ch0;
+		compress_str[Cvar[1].height * 100 + Cvar[1].row * 10 + Cvar[1].column] = restore_ch1;
+		compress_str[Cvar[2].height * 100 + Cvar[2].row * 10 + Cvar[2].column] = restore_ch2;
+	}
+	else {
+		//Cvar[0]; Cvar[1]; Cvar[2]; Cvar[3];
+		char restore_ch0 = charRestore(0, 0);
+		char restore_ch1 = charRestore(1, 0);
+		char restore_ch2 = charRestore(2, 0);
+		char restore_ch3 = charRestore(3, 0);
+
+
+		compress_str[Cvar[0].height * 100 + Cvar[0].row * 10 + Cvar[0].column] = restore_ch0;
+		compress_str[Cvar[1].height * 100 + Cvar[1].row * 10 + Cvar[1].column] = restore_ch1;
+		compress_str[Cvar[2].height * 100 + Cvar[2].row * 10 + Cvar[2].column] = restore_ch2;
+		compress_str[Cvar[3].height * 100 + Cvar[3].row * 10 + Cvar[3].column] = restore_ch3;
+	}
 }
+
+// 문자 복구 과정
+// Cvar_num_index = Cvar 구조체 번호, Avar_num_count = Avar 구조체 갯수
+char charRestore(int Cvar_num_index, int Avar_num_count) {
+	char restore_ch = Cvar[Cvar_num_index].ch;
+	int sum = 0;
+
+	if (Avar_num_count == 0) {
+		if (Cvar[0].row == Cvar[1].row || // 변조된 변수가 같은 행에 있을 경우 조건문이 참
+			Cvar[0].row == Cvar[2].row ||
+			Cvar[0].row == Cvar[3].row) {
+			if (Cvar[0].column == Cvar[1].column || // 변조된 변수가 같은 열에 있을 경우 조건문이 참
+				Cvar[0].column == Cvar[2].column ||
+				Cvar[0].column == Cvar[3].column) {
+				if (Cvar[0].height == Cvar[1].height || // 변조된 변수가 같은 높이에 있을 경우 조건문이 참
+					Cvar[0].height == Cvar[2].height ||
+					Cvar[0].height == Cvar[3].height) {
+					fprintf(stderr, "미친 확률 발생\n");
+					exit(1);
+				}
+				else {
+					for (int i = 10 * Cvar[0].row + Cvar[0].column; i < height + 1; i += 100) {
+						sum += compress_str[i];
+					}
+					restore_ch = Cvar[0].ch + ASC_height[Cvar[0].row][Cvar[0].column] - sum;
+				}
+			}
+			else {
+				for (int i = 100 * Cvar[0].height + Cvar[0].column; i < 100 * Cvar[0].height + Cvar[0].column + 10; i+=10) {
+					sum += compress_str[i];
+				}
+				restore_ch = Cvar[0].ch + ASC_column[Cvar[0].height][Cvar[0].column] - sum;
+			}
+		}
+		else {
+			for (int i = 100 * Cvar[0].height + 10 * Cvar[0].row; i < 100 * Cvar[0].height + 10 * Cvar[0].row + 10; i++) {
+				sum += compress_str[i];
+			}
+			restore_ch = Cvar[0].ch + ASC_row[Cvar[0].height][Cvar[0].row] - sum;
+		}
+	}
+	else if(Avar_num_count == 1){
+
+	}
+	else if (Avar_num_count == 2) {
+
+	}
+	else {
+
+	}
+
+	return restore_ch;
+}
+
+
 
 //파일 복원 함수
 void restore(const char* inputFile, const char* outputFile) {

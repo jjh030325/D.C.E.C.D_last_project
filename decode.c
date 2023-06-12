@@ -2,21 +2,23 @@
 #include <stdlib.h>
 #include <string.h>
 
-int** ASC_row = NULL;
-int** ASC_column = NULL;
+int** ASC_row;
+int** ASC_column;
 int ASC_height[10][10] = { 0 };
 
-int** compare_ASC_row = NULL;
-int** compare_ASC_column = NULL;
+int** compare_ASC_row;
+int** compare_ASC_column;
 int compare_ASC_height[10][10] = { 0 };
 
-char* compress_str = NULL;
-char* compare_compress_str = NULL;
+char* compress_str;
+char* compare_compress_str;
 
 int size = 0;
 int height = 0;
-int V_ASC_count = 0;
-int V_Char_count = 0;
+int V_ASC_count;
+int V_Char_count;
+
+
 // 인덱스 0부터 시작 되는 값을 그대로 받는다 배열에 그대로 가져다 쓰면 됨,
 typedef struct {
 	int row;
@@ -173,7 +175,8 @@ void getTable(const char* inputFile) {
 	compress_str[size] = '\n';
 	compare_compress_str[size] = '\n';
 	// 값 확인
-	/*
+	
+	
 	for (int i = 0; i < height + 1; i++) {
 		for (int j = 0; j < 10; j++) {
 			printf("ASC_column[%d][%d] : %d\n", i, j, ASC_column[i][j]);
@@ -186,72 +189,68 @@ void getTable(const char* inputFile) {
 		}
 		printf("\n");
 	}
-	*/
+	
+	
 	printf("compress_str : %s\n", compress_str);
 	printf("compare_compress_str : %s\n", compare_compress_str);
-	printf("getTable 성공\n");
+	//printf("getTable 성공\n");
 	fclose(output);
 	output = NULL;
 }
 void checkData() {
 	// 압축된 문자열에서 변조 확인 확인 
-
-	Cvar = (Char_variable*)malloc(sizeof(Char_variable) * 4);
-	Avar = (ASC_variable*)malloc(sizeof(ASC_variable) * 4);
-
+	Cvar = (Char_variable*)malloc(sizeof(Char_variable));
+	Avar = (ASC_variable*)malloc(sizeof(ASC_variable));
+	V_ASC_count = 0;
+	V_Char_count = 0;
 
 	for (int i = 0; i < size; i++) {
 		if (compare_compress_str[i] != compress_str[i]) {
-			V_ASC_count++;
-			Cvar[V_ASC_count - 1].ch = compress_str[i];
-			Cvar[V_ASC_count - 1].height = i /100;
-			if (i / 100 == 0) {
-				Cvar[V_ASC_count - 1].row = i / 10;
-				Cvar[V_ASC_count - 1].column = i % 10;
-			}
-			else {
-				int j = i;
-				if (height == 1) {
-					j -= 100;
-					Cvar[V_ASC_count - 1].row = j / 10;
-					Cvar[V_ASC_count - 1].column = j % 10;
-				}
-				else {
-					j -= 100 * (height-1);
-					Cvar[V_ASC_count - 1].row = j / 10;
-					Cvar[V_ASC_count - 1].column = j % 10;
+			if(V_Char_count != 0) Cvar = (Char_variable*)realloc(Cvar, sizeof(Char_variable) * (V_Char_count+1));
+			(Cvar + V_Char_count)->ch = compress_str[i];
+			(Cvar + V_Char_count)->height = i / 100;
+			for (int j = 0; j < height + 1; j++) {
+				if (i / 100 == j) {
+					int num = i;
+					num = num - 100 * j;
+					(Cvar + V_Char_count)->row = num / 10;
+					(Cvar + V_Char_count)->column = num % 10;
 				}
 			}
+			V_Char_count++;
 		}
 	}
-	printf("통과\n");
-	
-	
+
+
 	//아스키 데이터에서 변조 확인
 	for (int i = 0; i < height + 1; i++) {
 		for (int j = 0; j < 10; j++) {
 			if (compare_ASC_column[i][j] != ASC_column[i][j]) {
-				V_Char_count++;
-				Avar[V_Char_count - 1].type = 'c';
-				Avar[V_Char_count - 1].xpos = j;
-				Avar[V_Char_count - 1].ypos = i;
+				if (V_ASC_count != 0) Avar = (ASC_variable*)realloc(Avar, sizeof(ASC_variable) * (V_ASC_count + 1));
+				(Avar + V_ASC_count)->type = 'c';
+				(Avar + V_ASC_count)->xpos = j;
+				(Avar + V_ASC_count)->ypos = i;
+				V_ASC_count++;
 			}
 
 			if (compare_ASC_row[i][j] != ASC_row[i][j]) {
-				V_Char_count++;
-				Avar[V_Char_count - 1].type = 'r';
-				Avar[V_Char_count - 1].xpos = j;
-				Avar[V_Char_count - 1].ypos = i;
+				if (V_ASC_count != 0) Avar = (ASC_variable*)realloc(Avar, sizeof(ASC_variable) * (V_ASC_count + 1));
+				(Avar + V_ASC_count)->type = 'r';
+				(Avar + V_ASC_count)->xpos = j;
+				(Avar + V_ASC_count)->ypos = i;
+				V_ASC_count++;
 			}
 		}
 	}
+
 	for (int i = 0; i < 10; i++) {
 		for (int j = 0; j < 10; j++) {
 			if (compare_ASC_height[i][j] != ASC_height[i][j]) {
-				V_Char_count++;
-				Avar[V_Char_count - 1].type = 'h';
-				Avar[V_Char_count - 1].xpos = j;
-				Avar[V_Char_count - 1].ypos = i;
+				if (V_Char_count != 0) Avar = (ASC_variable*)realloc(Avar, sizeof(ASC_variable) * (V_ASC_count + 1));
+				(Avar + V_ASC_count)->type = 'h';
+				(Avar + V_ASC_count)->xpos = j;
+				(Avar + V_ASC_count)->ypos = i;
+				V_ASC_count++;
 			}
 		}
 	}
@@ -457,7 +456,7 @@ int main(int argc, char* argv[]) {
 	const char* outputFile = argv[2];
 	restore(inputFile, outputFile);
 	getTable(inputFile);
-	//checkData();
+	checkData();
 
 	// 할당 해제
 	for (int i = 0; i < height + 1; i++) {
@@ -476,6 +475,9 @@ int main(int argc, char* argv[]) {
 
 	free(compress_str);
 	free(compare_compress_str);
+
+	free(Cvar);
+	free(Avar);
 
 	return 0;
 }

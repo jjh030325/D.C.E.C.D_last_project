@@ -106,8 +106,6 @@ void getTable(const char* inputFile) {
 				else if (ch == '^' && i == 4) symbol++;
 			}
 			if (symbol >= 2) {
-				printf("! 조건문 GOOD\n");
-				printf("symbol : %d\n", symbol);
 				break;
 			}
 			symbol = 0;
@@ -123,7 +121,6 @@ void getTable(const char* inputFile) {
 				else if (ch == '^' && i == 3) symbol++;
 			}
 			if (symbol >= 2) {
-				printf("GOOD\n");
 				break;
 			}
 			symbol = 0;
@@ -138,7 +135,6 @@ void getTable(const char* inputFile) {
 				else if (ch == '^' && i == 2) symbol++;
 			}
 			if (symbol >= 2) {
-				printf("GOOD\n");
 				break;
 			}
 			symbol = 0;
@@ -152,7 +148,6 @@ void getTable(const char* inputFile) {
 				else if (ch == '^' && i == 1) symbol++;
 			}
 			if (symbol >= 2) {
-				printf("GOOD\n");
 				break;
 			}
 			symbol = 0;
@@ -163,8 +158,6 @@ void getTable(const char* inputFile) {
 	size -= 1;
 
 	fseek(output, 4, SEEK_CUR);
-	printf("현재 파일 위치 : %ld\n", ftell(output));
-	printf("FIEL SIZE : %d\n", size);
 	height = size / 100; // 0층부터 시작
 	size -= 100 * height; // 백자리 제외
 
@@ -215,26 +208,8 @@ void getTable(const char* inputFile) {
 	fread(compare_compress_str, 1, size, output);
 	compress_str[size] = '\n';
 	compare_compress_str[size] = '\n';
-	// 값 확인
 
 
-	for (int i = 0; i < height + 1; i++) {
-		for (int j = 0; j < 10; j++) {
-			printf("ASC_column[%d][%d] : %d\n", i, j, ASC_column[i][j]);
-		}
-		printf("\n");
-	}
-	for (int i = 0; i < height + 1; i++) {
-		for (int j = 0; j < 10; j++) {
-			printf("compare_ASC_column[%d][%d] : %d\n", i, j, compare_ASC_column[i][j]);
-		}
-		printf("\n");
-	}
-
-
-	printf("compress_str : %s\n", compress_str);
-	printf("compare_compress_str : %s\n", compare_compress_str);
-	//printf("getTable 성공\n");
 	fclose(output);
 	output = NULL;
 }
@@ -359,13 +334,13 @@ char charRestore(int Cvar_num_index, int Avar_num_count) {
 	else if (Avar_num_count == 1) {
 		if (Cvar[Cvar_num_index].row == Cvar[(Cvar_num_index + 1) % 3].row ||
 			Cvar[Cvar_num_index].row == Cvar[(Cvar_num_index + 2) % 3].row ||
-			(Cvar[Cvar_num_index].height == Avar[0].ypos && Cvar[Cvar_num_index].row == Avar[0].xpos)) {
+			(Cvar[Cvar_num_index].height == Avar[0].ypos && Cvar[Cvar_num_index].row == Avar[0].xpos && Avar[0].type == 'r')) {
 			if (Cvar[Cvar_num_index].column == Cvar[(Cvar_num_index + 1) % 3].column ||
 				Cvar[Cvar_num_index].column == Cvar[(Cvar_num_index + 2) % 3].column ||
-				(Cvar[Cvar_num_index].height == Avar[0].ypos && Cvar[Cvar_num_index].column == Avar[0].xpos)) {
+				(Cvar[Cvar_num_index].height == Avar[0].ypos && Cvar[Cvar_num_index].column == Avar[0].xpos && Avar[0].type == 'c')) {
 				if (Cvar[Cvar_num_index].height == Cvar[(Cvar_num_index + 1) % 3].height ||
 					Cvar[Cvar_num_index].height == Cvar[(Cvar_num_index + 2) % 3].height ||
-					(Cvar[Cvar_num_index].row == Avar[0].ypos && Cvar[Cvar_num_index].column == Avar[0].xpos)) {
+					(Cvar[Cvar_num_index].row == Avar[0].ypos && Cvar[Cvar_num_index].column == Avar[0].xpos && Avar[0].type == 'h')) {
 					fprintf(stderr, "미친 확률 발생\n");
 					exit(1);
 				}
@@ -392,14 +367,14 @@ char charRestore(int Cvar_num_index, int Avar_num_count) {
 	}
 	else if (Avar_num_count == 2) {
 		if (Cvar[Cvar_num_index].row == Cvar[(Cvar_num_index + 1) % 2].row ||
-			(Cvar[Cvar_num_index].height == Avar[0].ypos && Cvar[Cvar_num_index].row == Avar[0].xpos) ||
-			(Cvar[Cvar_num_index].height == Avar[1].ypos && Cvar[Cvar_num_index].row == Avar[1].xpos)) {
+			(Cvar[Cvar_num_index].height == Avar[0].ypos && Cvar[Cvar_num_index].row == Avar[0].xpos && Avar[0].type == 'r') ||
+			(Cvar[Cvar_num_index].height == Avar[1].ypos && Cvar[Cvar_num_index].row == Avar[1].xpos && Avar[1].type == 'r')) {
 			if (Cvar[Cvar_num_index].column == Cvar[(Cvar_num_index + 1) % 2].column ||
-				(Cvar[Cvar_num_index].height == Avar[0].ypos && Cvar[Cvar_num_index].column == Avar[0].xpos) ||
-				(Cvar[Cvar_num_index].height == Avar[1].ypos && Cvar[Cvar_num_index].column == Avar[1].xpos)) {
+				(Cvar[Cvar_num_index].height == Avar[0].ypos && Cvar[Cvar_num_index].column == Avar[0].xpos && Avar[0].type == 'c') ||
+				(Cvar[Cvar_num_index].height == Avar[1].ypos && Cvar[Cvar_num_index].column == Avar[1].xpos && Avar[1].type == 'c')) {
 				if (Cvar[Cvar_num_index].height == Cvar[(Cvar_num_index + 1) % 2].height ||
-					(Cvar[Cvar_num_index].row == Avar[0].ypos && Cvar[Cvar_num_index].column == Avar[0].xpos) ||
-					(Cvar[Cvar_num_index].row == Avar[1].ypos && Cvar[Cvar_num_index].column == Avar[1].xpos)) {
+					(Cvar[Cvar_num_index].row == Avar[0].ypos && Cvar[Cvar_num_index].column == Avar[0].xpos && Avar[0].type == 'h') ||
+					(Cvar[Cvar_num_index].row == Avar[1].ypos && Cvar[Cvar_num_index].column == Avar[1].xpos && Avar[1].type == 'h')) {
 					fprintf(stderr, "미친 확률 발생\n");
 					exit(1);
 				}
@@ -425,15 +400,15 @@ char charRestore(int Cvar_num_index, int Avar_num_count) {
 		}
 	}
 	else {
-		if ((Cvar[Cvar_num_index].height == Avar[0].ypos && Cvar[Cvar_num_index].row == Avar[0].xpos) ||
-			(Cvar[Cvar_num_index].height == Avar[1].ypos && Cvar[Cvar_num_index].row == Avar[1].xpos) ||
-			(Cvar[Cvar_num_index].height == Avar[2].ypos && Cvar[Cvar_num_index].row == Avar[2].xpos)) {
-			if ((Cvar[Cvar_num_index].height == Avar[0].ypos && Cvar[Cvar_num_index].column == Avar[0].xpos) ||
-				(Cvar[Cvar_num_index].height == Avar[1].ypos && Cvar[Cvar_num_index].column == Avar[1].xpos) ||
-				(Cvar[Cvar_num_index].height == Avar[2].ypos && Cvar[Cvar_num_index].column == Avar[2].xpos)) {
-				if ((Cvar[Cvar_num_index].row == Avar[0].ypos && Cvar[Cvar_num_index].column == Avar[0].xpos) ||
-					(Cvar[Cvar_num_index].row == Avar[1].ypos && Cvar[Cvar_num_index].column == Avar[1].xpos) ||
-					(Cvar[Cvar_num_index].row == Avar[2].ypos && Cvar[Cvar_num_index].column == Avar[2].xpos)) {
+		if ((Cvar[Cvar_num_index].height == Avar[0].ypos && Cvar[Cvar_num_index].row == Avar[0].xpos && Avar[0].type == 'r') ||
+			(Cvar[Cvar_num_index].height == Avar[1].ypos && Cvar[Cvar_num_index].row == Avar[1].xpos && Avar[1].type == 'r') ||
+			(Cvar[Cvar_num_index].height == Avar[2].ypos && Cvar[Cvar_num_index].row == Avar[2].xpos && Avar[2].type == 'r')) {
+			if ((Cvar[Cvar_num_index].height == Avar[0].ypos && Cvar[Cvar_num_index].column == Avar[0].xpos && Avar[0].type == 'c') ||
+				(Cvar[Cvar_num_index].height == Avar[1].ypos && Cvar[Cvar_num_index].column == Avar[1].xpos && Avar[1].type == 'c') ||
+				(Cvar[Cvar_num_index].height == Avar[2].ypos && Cvar[Cvar_num_index].column == Avar[2].xpos && Avar[2].type == 'c')) {
+				if ((Cvar[Cvar_num_index].row == Avar[0].ypos && Cvar[Cvar_num_index].column == Avar[0].xpos && Avar[0].type == 'h') ||
+					(Cvar[Cvar_num_index].row == Avar[1].ypos && Cvar[Cvar_num_index].column == Avar[1].xpos && Avar[1].type == 'h') ||
+					(Cvar[Cvar_num_index].row == Avar[2].ypos && Cvar[Cvar_num_index].column == Avar[2].xpos && Avar[2].type == 'h')) {
 					fprintf(stderr, "미친 확률 발생\n");
 					exit(1);
 				}
@@ -492,7 +467,7 @@ void fileRestore(const char* inputFile, const char* outputFile) {
 
 	// 바이너리 파일에서 데이터 읽어와 텍스트 파일에 쓰기
 	int ch;
-	for (int i = 0; i < size; i++ ) {
+	for (int i = 0; i < size; i++) {
 		ch = compress_str[i];
 		// '\n' 문자일 경우
 		if (ch == '\n') {
@@ -642,9 +617,7 @@ void fileRestore(const char* inputFile, const char* outputFile) {
 // 압축된 문자 복원 함수
 void dataRestore(const char* inputFile, const char* outputFile) {
 	printf("dataRestore 진입\n");
-	if (V_ASC_count == 4) {
-		printf("V_ASC_count == 4 진입\n");
-	}
+	if (V_ASC_count == 4) return;
 	else if (V_ASC_count == 3 && V_Char_count == 1) {
 		//Avar[0]; Avar[1]; Avar[2]; Cvar[0];
 		char restore_ch0 = charRestore(0, 3);
@@ -685,9 +658,6 @@ void dataRestore(const char* inputFile, const char* outputFile) {
 		compress_str[Cvar[2].height * 100 + Cvar[2].row * 10 + Cvar[2].column] = restore_ch2;
 		compress_str[Cvar[3].height * 100 + Cvar[3].row * 10 + Cvar[3].column] = restore_ch3;
 	}
-
-	// 복구된 문자열 파일에 덮어쓰기
-
 }
 
 

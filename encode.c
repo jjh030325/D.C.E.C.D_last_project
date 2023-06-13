@@ -13,10 +13,9 @@ void encodeASC(const char* outputFile)
     int size = 0;
     char ch;
     while (fread(&ch, 1, 1, output) == 1) size++; // 파일 전체 사이즈
-		size = size / 2;
-		size = size - 6;
-		
-		printf("FILE SIZE : %d\n", size);
+    size = size / 2;
+    size = size - 6;
+
     fseek(output, 0, SEEK_SET);
     int height = size / 100;
 
@@ -28,7 +27,6 @@ void encodeASC(const char* outputFile)
         ASC_column[i] = (int*)calloc(10, sizeof(int));
         ASC_row[i] = (int*)calloc(10, sizeof(int));
     }
-    printf("동적 할당 완료\n");
 
     for (int k = 0; k < height; k++) { // 최대 높이 만큼 반복
         for (int i = 0; i < 10; i++) { // 세로
@@ -38,17 +36,12 @@ void encodeASC(const char* outputFile)
                     fclose(output);
                     return;
                 }
-                printf("%d%d%d 번째 아스키 코드값 : %d\n", k, i, j, ch);
                 ASC_column[k][j] += ch; // 높이 고정, 가로 j가 증가하면서 해당 행에 대한 값을 더한다
-                printf("ASC_column[%d][%d] : %d\n", k, j, ASC_column[k][j]);
                 ASC_row[k][i] += ch; // 높이 고정, 세로 i가 증가하면서 해당 열에 대한 값을 더한다
-                printf("ASC_row[%d][%d] : %d\n", k, i, ASC_row[k][i]);
                 ASC_height[i][j] += ch;  // 
-                printf("ASC_height[%d][%d] : %d\n\n", i, j, ASC_height[i][j]);
             }
         }
     }
-    printf("100단위 값 저장 완료\n");
 
 
     for (int i = 0; i < size / 10 + 1; i++) { // 나머지 길이만큼 반복
@@ -57,13 +50,9 @@ void encodeASC(const char* outputFile)
                 printf(" Read to file end\n");
                 break;
             }
-            printf("%d%d%d 번째 아스키 코드값 : %d\n", height, i, j, ch);
             ASC_column[height][j] += ch; // 높이 고정, 가로 j가 증가하면서 해당 행에 대한 값을 더한다
-            printf("ASC_column[%d][%d] : %d\n", height, j, ASC_column[height][j]);
             ASC_row[height][i] += ch; // 높이 고정, 세로 i가 증가하면서 해당 열에 대한 값을 더한다
-            printf("ASC_row[%d][%d] : %d\n", height, i, ASC_row[height][i]);
             ASC_height[height][j] += ch;
-            printf("ASC_height[%d][%d] : %d\n\n", height, j, ASC_height[height][j]);
         }
     }
     fclose(output);
@@ -75,7 +64,6 @@ void encodeASC(const char* outputFile)
         fclose(output);
         return;
     }
-		printf("덧붙여 쓰기 시작 위치 : %ld\n", ftell(encodedOutput));
     for (int k = 0; k < height + 1; k++) {
         fwrite(ASC_column[k], sizeof(int), 10, encodedOutput);
         fwrite(ASC_row[k], sizeof(int), 10, encodedOutput);
@@ -83,7 +71,7 @@ void encodeASC(const char* outputFile)
     for (int k = 0; k < 10; k++) {
         fwrite(ASC_height[k], sizeof(int), 10, encodedOutput);
     }
-		
+
     for (int k = 0; k < height + 1; k++) {
         fwrite(ASC_column[k], sizeof(int), 10, encodedOutput);
         fwrite(ASC_row[k], sizeof(int), 10, encodedOutput);
@@ -257,39 +245,39 @@ int main(int argc, char* argv[])
 
     encodeData(inputFile, outputFile);
     encodeData(inputFile, outputFile);
-		char ch;
-		FILE* output = fopen(outputFile,"ab");
-		if( output == NULL ){
-				printf("outputFILE open error\n");
-				return 0;
-		}
-    for (int i = 0; i < 6; i++) {
-				if(i == 0){
-        		ch = '!';
-       			fwrite(&ch, sizeof(char), 1, output);
-				}
-				if(i == 1){
-        		ch = '@';
-       			fwrite(&ch, sizeof(char), 1, output);
-				}
-				if(i == 2){
-        		ch = '#';
-       			fwrite(&ch, sizeof(char), 1, output);
-				}
-				if(i == 3){
-        		ch = '$';
-       			fwrite(&ch, sizeof(char), 1, output);
-				}
-				if(i == 4){
-        		ch = '%';
-       			fwrite(&ch, sizeof(char), 1, output);
-				}
-				else{
-        		ch = '^';
-       			fwrite(&ch, sizeof(char), 1, output);
-				}
+    char ch;
+    FILE* output = fopen(outputFile, "ab");
+    if (output == NULL) {
+        printf("outputFILE open error\n");
+        return 0;
     }
-		fclose(output);
+    for (int i = 0; i < 6; i++) {
+        if (i == 0) {
+            ch = '!';
+            fwrite(&ch, sizeof(char), 1, output);
+        }
+        if (i == 1) {
+            ch = '@';
+            fwrite(&ch, sizeof(char), 1, output);
+        }
+        if (i == 2) {
+            ch = '#';
+            fwrite(&ch, sizeof(char), 1, output);
+        }
+        if (i == 3) {
+            ch = '$';
+            fwrite(&ch, sizeof(char), 1, output);
+        }
+        if (i == 4) {
+            ch = '%';
+            fwrite(&ch, sizeof(char), 1, output);
+        }
+        else {
+            ch = '^';
+            fwrite(&ch, sizeof(char), 1, output);
+        }
+    }
+    fclose(output);
     printf("Encoded data saved to '%s'.\n", outputFile);
 
 
